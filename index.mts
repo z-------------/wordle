@@ -1,24 +1,23 @@
-import * as readline from "node:readline/promises";
-import { open } from "node:fs/promises";
-import colors from "yoctocolors";
-import { stdin, stdout } from "node:process";
 import { InvalidArgumentError, program } from "commander";
+import { open } from "node:fs/promises";
+import WebSocket, { RawData, WebSocketServer } from "ws";
+import { isValidWord } from "./common.mjs";
+import Game, { State } from "./game.mjs";
 
-enum Verdict {
-    HIT,
-    PRESENT,
-    MISS,
+enum MessageKind {
+    TURN = "TURN",
+    GUESS = "GUESS",
+    INVALID_GUESS = "INVALID_GUESS",
+    VERDICTS = "VERDICTS",
+    OUTCOME = "OUTCOME",
 }
 
-const WORD_LENGTH = 5;
-
-function isAllLetters(s: string): boolean {
-    return /^[A-Za-z]*$/.test(s);
+interface Message {
+    kind: MessageKind;
+    data: string;
 }
 
-function isValidWord(word: string): boolean {
-    return word.length === WORD_LENGTH && isAllLetters(word);
-}
+const PORT = 8000;
 
 async function readWordList(filename: string): Promise<string[]> {
     try {
@@ -41,62 +40,42 @@ async function readWordList(filename: string): Promise<string[]> {
     }
 }
 
-function sample<T>(choices: T[]): T {
-    return choices[Math.floor(Math.random() * choices.length)];
-}
-
-async function readGuessedWord(rl: readline.Interface, wordList: string[], guessesLeft: number): Promise<string> {
-    while (true) {
-        const guessedWord = (await rl.question(`Enter your guess (${guessesLeft} tries left): `)).toUpperCase();
-        if (!isValidWord(guessedWord)) {
-            console.log(colors.red("Invalid guess."));
-        } else if (!wordList.includes(guessedWord)) {
-            console.log(colors.red("Invalid guess: not in word list."));
-        } else {
-            return guessedWord;
-        }
-    }
-}
-
-function judge(word: string, guessedWord: string): Verdict[] {
-    const verdicts: Verdict[] = Array(WORD_LENGTH).fill(Verdict.MISS);
-    const usedIndexes: number[] = [];
-    // check for HIT letters
-    for (let i = 0; i < guessedWord.length; ++i) {
-        if (guessedWord[i] === word[i]) {
-            verdicts[i] = Verdict.HIT;
-            usedIndexes.push(i);
-        }
-    }
-    // check for PRESENT letters that aren't already used
-    for (let i = 0; i < guessedWord.length; ++i) {
-        for (let j = 0; j < word.length; ++j) {
-            if (guessedWord[i] === word[j] && verdicts[i] !== Verdict.HIT && !usedIndexes.includes(j)) {
-                verdicts[i] = Verdict.PRESENT;
-                usedIndexes.push(j);
-                break;
-            }
-        }
-    }
-    return verdicts;
-}
-
-function formatVerdicts(verdicts: Verdict[], guessedWord: string): string {
-    let displayed = "";
-    for (let i = 0; i < WORD_LENGTH; ++i) {
-        const verdict = verdicts[i];
-        const format = verdict === Verdict.HIT ? colors.bgGreen : verdict === Verdict.PRESENT ? colors.bgYellow : colors.reset;
-        displayed += format(guessedWord[i]);
-    }
-    return displayed;
-}
-
 function parsePositiveOption(s: string): number {
     const value = parseInt(s);
     if (Number.isNaN(value) || value < 1) {
         throw new InvalidArgumentError("Not a positive integer.");
     }
     return value;
+}
+
+function isMessage(obj: unknown): obj is Message {
+    return !!obj
+        && typeof obj === "object"
+        && "kind" in obj
+        && typeof obj.kind === "string"
+        && obj.kind in MessageKind
+        && "data" in obj
+        && typeof obj.data === "string";
+}
+
+function parseMessage(data: RawData): Message | undefined {
+    try {
+        const obj: unknown = JSON.parse(data.toString("utf-8"));
+        if (isMessage(obj)) {
+            return {
+                kind: obj.kind,
+                data: obj.data,
+            };
+        } else {
+            console.error("invalid message");
+        }
+    } catch (e) {
+        console.error(`failed to parse message: ${e}`);
+    }
+}
+
+function sendMessage(ws: WebSocket, kind: MessageKind, data: string) {
+    ws.send(JSON.stringify({ kind, data }));
 }
 
 program
@@ -106,30 +85,40 @@ program.parse();
 const opts = program.opts();
 const maxGuesses = opts.maxGuesses || 5;
 const wordList = await readWordList(opts.wordsList || "words.txt");
-const word = sample(wordList);
 
-console.log(colors.bold("Welcome to Wordle."));
-console.log("");
-console.log(colors.bold("Rules:"));
-console.log(`Guess the ${WORD_LENGTH}-letter word within ${maxGuesses} tries.`);
-console.log(`${colors.bgGreen("Green")} means the letter is correct. ${colors.bgYellow("Yellow")} means the letter is present but in the wrong position.`);
-console.log("Otherwise, the letter is incorrect.")
+const wss = new WebSocketServer({ port: PORT });
+wss.on("connection", (ws) => {
+    console.log("client connected");
 
-const rl = readline.createInterface({
-    input: stdin,
-    output: stdout,
+    const game = new Game(maxGuesses, wordList);
+    sendMessage(ws, MessageKind.TURN, game.guessesLeft.toString());
+
+    ws.on("error", console.error);
+    ws.on("close", () => console.log("client disconnected"));
+    ws.on("message", (data) => {
+        const message = parseMessage(data);
+        console.log(message);
+        if (message) {
+            if (message.kind === MessageKind.GUESS) {
+                console.log("received guess", message.data);
+                const guessResult = game.guess(message.data);
+                if (guessResult.error) {
+                    sendMessage(ws, MessageKind.INVALID_GUESS, guessResult.error);
+                } else if (guessResult.verdicts) {
+                    sendMessage(ws, MessageKind.VERDICTS, JSON.stringify(guessResult.verdicts));
+                }
+                if (game.state === State.IN_PROGRESS) {
+                    sendMessage(ws, MessageKind.TURN, game.guessesLeft.toString());
+                } else {
+                    sendMessage(ws, MessageKind.OUTCOME, game.state === State.WIN ? "win" : "lose");
+                    ws.close();
+                }
+            } else {
+                console.warn("unexpected message kind", message.kind);
+            }
+        } else {
+            console.warn("received invalid message", data);
+        }
+    });
 });
-
-let win = false;
-for (let i = 0; !win && i < maxGuesses; ++i) {
-    const guessedWord = await readGuessedWord(rl, wordList, maxGuesses - i);
-    const verdicts = judge(word, guessedWord);
-    console.log(formatVerdicts(verdicts, guessedWord));
-    win = verdicts.every(v => v === Verdict.HIT);
-}
-rl.close();
-if (win) {
-    console.log("You win.");
-} else {
-    console.log(`You lose. The word was '${word}'.`);
-}
+console.log("listening on", PORT);

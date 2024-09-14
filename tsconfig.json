@@ -5,8 +5,12 @@
         "outDir": "dist",
         "moduleResolution": "NodeNext",
         "strict": true,
+        "noImplicitAny": true,
+        "useUnknownInCatchVariables": true,
     },
     "files": [
+        "common.mts",
+        "game.mts",
         "index.mts",
     ],
 }
