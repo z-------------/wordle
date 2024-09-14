@@ -40,13 +40,16 @@ function sample<T>(choices: T[]): T {
     return choices[Math.floor(Math.random() * choices.length)];
 }
 
-async function readGuessedWord(rl: readline.Interface, guessesLeft: number): Promise<string> {
+async function readGuessedWord(rl: readline.Interface, wordList: string[], guessesLeft: number): Promise<string> {
     while (true) {
         const guessedWord = (await rl.question(`Enter your guess (${guessesLeft} tries left): `)).toUpperCase();
-        if (isValidWord(guessedWord)) {
+        if (!isValidWord(guessedWord)) {
+            console.log(colors.red("Invalid guess."));
+        } else if (!wordList.includes(guessedWord)) {
+            console.log(colors.red("Invalid guess: not in word list."));
+        } else {
             return guessedWord;
         }
-        console.log(colors.red("Invalid guess."));
     }
 }
 
@@ -84,7 +87,8 @@ function formatVerdicts(verdicts: Verdict[], guessedWord: string): string {
 }
 
 const maxGuesses = 5;
-const word = sample(await readWordList("words.txt"));
+const wordList = await readWordList("words.txt");
+const word = sample(wordList);
 
 console.log(colors.bold("Welcome to Wordle."));
 console.log("");
@@ -100,7 +104,7 @@ const rl = readline.createInterface({
 
 let win = false;
 for (let i = 0; !win && i < maxGuesses; ++i) {
-    const guessedWord = await readGuessedWord(rl, maxGuesses - i);
+    const guessedWord = await readGuessedWord(rl, wordList, maxGuesses - i);
     const verdicts = judge(word, guessedWord);
     console.log(formatVerdicts(verdicts, guessedWord));
     win = verdicts.every(v => v === Verdict.HIT);
