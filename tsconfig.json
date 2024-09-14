@@ -1,16 +1,8 @@
 {
-    "compilerOptions": {
-        "module": "NodeNext",
-        "target": "ES2022",
-        "outDir": "dist",
-        "moduleResolution": "NodeNext",
-        "strict": true,
-        "noImplicitAny": true,
-        "useUnknownInCatchVariables": true,
-    },
-    "files": [
-        "common.mts",
-        "game.mts",
-        "index.mts",
-    ],
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.server.json" }
+  ]
 }

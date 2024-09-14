@@ -1,21 +1,9 @@
 import { InvalidArgumentError, program } from "commander";
 import { open } from "node:fs/promises";
-import WebSocket, { RawData, WebSocketServer } from "ws";
+import WebSocket, { WebSocketServer } from "ws";
+import { MessageKind, parseMessage } from "../common/message.mjs";
 import { isValidWord } from "./common.mjs";
 import Game, { State } from "./game.mjs";
-
-enum MessageKind {
-    TURN = "TURN",
-    GUESS = "GUESS",
-    INVALID_GUESS = "INVALID_GUESS",
-    VERDICTS = "VERDICTS",
-    OUTCOME = "OUTCOME",
-}
-
-interface Message {
-    kind: MessageKind;
-    data: string;
-}
 
 const PORT = 8000;
 
@@ -48,43 +36,17 @@ function parsePositiveOption(s: string): number {
     return value;
 }
 
-function isMessage(obj: unknown): obj is Message {
-    return !!obj
-        && typeof obj === "object"
-        && "kind" in obj
-        && typeof obj.kind === "string"
-        && obj.kind in MessageKind
-        && "data" in obj
-        && typeof obj.data === "string";
-}
-
-function parseMessage(data: RawData): Message | undefined {
-    try {
-        const obj: unknown = JSON.parse(data.toString("utf-8"));
-        if (isMessage(obj)) {
-            return {
-                kind: obj.kind,
-                data: obj.data,
-            };
-        } else {
-            console.error("invalid message");
-        }
-    } catch (e) {
-        console.error(`failed to parse message: ${e}`);
-    }
-}
-
 function sendMessage(ws: WebSocket, kind: MessageKind, data: string) {
     ws.send(JSON.stringify({ kind, data }));
 }
 
 program
     .option("--maxGuesses <n>", "maximum number of guesses", parsePositiveOption)
-    .option("--wordsList <filename>", "filename containing the newline-delimited word list");
+    .requiredOption("--wordsList <filename>", "filename containing the newline-delimited word list");
 program.parse();
 const opts = program.opts();
 const maxGuesses = opts.maxGuesses || 5;
-const wordList = await readWordList(opts.wordsList || "words.txt");
+const wordList = await readWordList(opts.wordsList);
 
 const wss = new WebSocketServer({ port: PORT });
 wss.on("connection", (ws) => {
@@ -96,7 +58,7 @@ wss.on("connection", (ws) => {
     ws.on("error", console.error);
     ws.on("close", () => console.log("client disconnected"));
     ws.on("message", (data) => {
-        const message = parseMessage(data);
+        const message = parseMessage(data.toString("utf-8"));
         console.log(message);
         if (message) {
             if (message.kind === MessageKind.GUESS) {

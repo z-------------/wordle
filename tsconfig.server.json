@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "module": "NodeNext",
+        "target": "ES2022",
+        "outDir": "dist-server",
+        "moduleResolution": "NodeNext",
+        "strict": true,
+        "noImplicitAny": true,
+        "useUnknownInCatchVariables": true,
+    },
+    "include": ["server", "common"]
+}

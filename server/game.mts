@@ -1,10 +1,5 @@
+import { Verdict } from "../common/verdict.mjs";
 import { isValidWord, WORD_LENGTH } from "./common.mjs";
-
-export enum Verdict {
-    HIT,
-    PRESENT,
-    MISS,
-}
 
 export enum State {
     IN_PROGRESS,
