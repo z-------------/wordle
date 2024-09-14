@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "module": "NodeNext",
+        "target": "ES2022",
+        "outDir": "dist",
+        "moduleResolution": "NodeNext",
+        "strict": true,
+    },
+    "files": [
+        "index.mts",
+    ],
+}
