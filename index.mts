@@ -2,6 +2,7 @@ import * as readline from "node:readline/promises";
 import { open } from "node:fs/promises";
 import colors from "yoctocolors";
 import { stdin, stdout } from "node:process";
+import { InvalidArgumentError, program } from "commander";
 
 enum Verdict {
     HIT,
@@ -20,20 +21,24 @@ function isValidWord(word: string): boolean {
 }
 
 async function readWordList(filename: string): Promise<string[]> {
-    const wordList = [];
-    const file = await open(filename);
-    for await (const line of file.readLines()) {
-        const word = line.trim();
-        if (isValidWord(word)) {
-            wordList.push(word.toUpperCase());
-        } else {
-            console.warn(`Ignoring invalid word in word list: "${word}"`);
+    try {
+        const wordList = [];
+        const file = await open(filename);
+        for await (const line of file.readLines()) {
+            const word = line.trim();
+            if (isValidWord(word)) {
+                wordList.push(word.toUpperCase());
+            } else {
+                console.warn(`Ignoring invalid word in word list: "${word}"`);
+            }
         }
+        if (wordList.length === 0) {
+            throw new Error("Word list is empty");
+        }
+        return wordList;
+    } catch (e) {
+        throw new Error(`Failed to read words list: ${e}`);
     }
-    if (wordList.length === 0) {
-        throw new Error("Word list is empty");
-    }
-    return wordList;
 }
 
 function sample<T>(choices: T[]): T {
@@ -86,8 +91,21 @@ function formatVerdicts(verdicts: Verdict[], guessedWord: string): string {
     return displayed;
 }
 
-const maxGuesses = 5;
-const wordList = await readWordList("words.txt");
+function parsePositiveOption(s: string): number {
+    const value = parseInt(s);
+    if (Number.isNaN(value) || value < 1) {
+        throw new InvalidArgumentError("Not a positive integer.");
+    }
+    return value;
+}
+
+program
+    .option("--maxGuesses <n>", "maximum number of guesses", parsePositiveOption)
+    .option("--wordsList <filename>", "filename containing the newline-delimited word list");
+program.parse();
+const opts = program.opts();
+const maxGuesses = opts.maxGuesses || 5;
+const wordList = await readWordList(opts.wordsList || "words.txt");
 const word = sample(wordList);
 
 console.log(colors.bold("Welcome to Wordle."));
