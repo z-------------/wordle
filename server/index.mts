@@ -17,15 +17,19 @@ const io = new Server(server);
 io.on("connection", (socket) => {
     console.log("client connected");
 
-    const game = new Game(opts.maxGuesses, wordList);
-    socket.send(createMessage(MessageKind.TURN, game.guessesLeft.toString()));
+    let game: Game | undefined;
 
-    socket.on("disconnect", () => console.log("client disconnected"));
+    socket.on("disconnect", () => {
+        console.log("client disconnected");
+        game = undefined;
+    });
     socket.on("message", (data) => {
         const message = parseMessage(data);
-        console.log(message);
         if (message) {
-            if (message.kind === MessageKind.GUESS) {
+            if (message.kind === MessageKind.HELLO) {
+                game = game ?? new Game(opts.maxGuesses, wordList);
+                socket.send(createMessage(MessageKind.TURN, game.guessesLeft.toString()));
+            } else if (message.kind === MessageKind.GUESS && game) {
                 console.log("received guess", message.data);
                 const guessedWord = message.data;
                 const guessResult = game.guess(guessedWord);

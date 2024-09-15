@@ -1,4 +1,5 @@
 export enum MessageKind {
+    HELLO = "HELLO",
     TURN = "TURN",
     GUESS = "GUESS",
     INVALID_GUESS = "INVALID_GUESS",
