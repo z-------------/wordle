@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { createMessage, MessageKind, parseMessage } from "../common/message.mts";
-import { Verdict } from "../common/verdict.mts";
-import Word from "./Word";
 import { socket } from "./socket";
+import WordHistory, { WordHistoryEntry } from "./WordHistory";
 
 enum Phase {
   BEFORE_START,
@@ -12,23 +11,28 @@ enum Phase {
 
 export default function Wordle() {
   const [phase, setPhase] = useState(Phase.BEFORE_START);
-  const [guessesLeft, setGuessesLeft] = useState(0);
   const [guessedWord, setGuessedWord] = useState("");
-  const [wordHistory, setWordHistory] = useState([] as { word: string, verdicts: Verdict[] }[]);
+  const [guessesLeft, setGuessesLeft] = useState(0);
+  const [wordHistory, setWordHistory] = useState([] as WordHistoryEntry[]);
+  const [opponentGuessesLeft, setOpponentGuessesLeft] = useState(0);
+  const [opponentWordHistory, setOpponentWordHistory] = useState([] as WordHistoryEntry[]);
 
   useEffect(() => {
     function handleMessage(data: unknown) {
       const message = parseMessage(data);
       if (message) {
-        if (message.kind === MessageKind.VERDICTS) {
+        if (message.kind === MessageKind.VERDICTS || message.kind === MessageKind.OPPONENT_VERDICTS) {
           const [guessedWord, verdicts] = JSON.parse(message.data);
-          setWordHistory((prev) => prev.concat({
+          const setter = message.kind === MessageKind.VERDICTS ? setWordHistory : setOpponentWordHistory;
+          setter((prev) => prev.concat({
             word: guessedWord,
             verdicts,
           }));
         } else if (message.kind === MessageKind.TURN) {
           setGuessesLeft(Number(message.data));
           setPhase(Phase.CAN_GUESS);
+        } else if (message.kind === MessageKind.OPPONENT_TURN) {
+          setOpponentGuessesLeft(Number(message.data));
         }
       }
     }
@@ -70,14 +74,10 @@ export default function Wordle() {
       >
         Enter
       </button>
-      <ol>
-        {wordHistory.map(({ word, verdicts }, i) => (
-          <li key={i}>
-            <Word word={word} verdicts={verdicts} />
-          </li>
-        ))}
-      </ol>
-      <div>{guessesLeft} guesses left</div>
+      <div style={{"display": "flex"}}>
+        <WordHistory guessesLeft={guessesLeft} wordHistory={wordHistory} />
+        <WordHistory guessesLeft={opponentGuessesLeft} wordHistory={opponentWordHistory} />
+      </div>
     </>
   );
 }

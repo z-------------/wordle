@@ -12,10 +12,6 @@ export interface GuessResult {
     error?: string;
 }
 
-function sample<T>(choices: T[]): T {
-    return choices[Math.floor(Math.random() * choices.length)];
-}
-
 function judge(word: string, guessedWord: string): Verdict[] {
     const verdicts: Verdict[] = Array(WORD_LENGTH).fill(Verdict.MISS);
     const usedIndexes: number[] = [];
@@ -42,14 +38,13 @@ function judge(word: string, guessedWord: string): Verdict[] {
 export default class Game {
     private win = false;
     private _guessesLeft: number;
-    private readonly word: string;
 
     constructor(
         private readonly maxGuesses: number,
+        private readonly word: string,
         private readonly wordList: string[],
     ) {
         this._guessesLeft = this.maxGuesses;
-        this.word = sample(wordList);
     }
 
     get guessesLeft(): number {

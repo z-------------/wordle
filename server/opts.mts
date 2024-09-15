@@ -8,7 +8,12 @@ function parsePositiveOption(s: string): number {
     return value;
 }
 
-export function parseOpts(): OptionValues {
+interface Opts {
+    maxGuesses: number;
+    wordsList: string;
+}
+
+export function parseOpts(): Opts {
     program
         .option("--maxGuesses <n>", "maximum number of guesses", parsePositiveOption, 5)
         .requiredOption("--wordsList <filename>", "filename containing the newline-delimited word list");
