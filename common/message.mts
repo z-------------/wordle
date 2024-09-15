@@ -10,6 +10,7 @@ export enum MessageKind {
     ROUND = "ROUND",
     ROUND_OUTCOME = "ROUND_OUTCOME",
     OVERALL_OUTCOME = "OVERALL_OUTCOME",
+    LEAVE = "LEAVE",
 }
 
 export interface Message {

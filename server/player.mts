@@ -10,4 +10,5 @@ export default interface Player {
     notifyRound(currentRound: number, totalRounds: number): void;
     notifyRoundOutcome(scores: number[]): void;
     notifyOverallOutcome(outcome: Outcome, scores: number[]): void;
+    notifyLeave(reason: string): void;
 }

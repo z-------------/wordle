@@ -10,7 +10,7 @@ import SocketPlayer from "./socket-player.mjs";
 
 const opts = parseOpts();
 const wordList = await readWordList(opts.wordsList);
-const lobbies = [] as Lobby[];
+let lobbies = [] as Lobby[];
 
 const PORT = 8000;
 const app = express();
@@ -19,6 +19,7 @@ const io = new Server(server);
 
 function findOrCreateLobby(player: Player): Lobby {
     let lobby: Lobby | undefined;
+    console.log(lobbies.length, "existing lobbies");
     for (const existingLobby of lobbies) {
         if (!existingLobby.isFull) {
             console.log("using existing lobby");
@@ -35,6 +36,11 @@ function findOrCreateLobby(player: Player): Lobby {
     return lobby;
 }
 
+function deleteLobby(lobby: Lobby) {
+    lobbies = lobbies.filter((l) => l !== lobby);
+    console.log("deleted a lobby,", lobbies.length, "remaining lobbies");
+}
+
 io.on("connection", (socket) => {
     console.log("client connected");
 
@@ -43,6 +49,10 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
         console.log("client disconnected");
+        if (lobby) {
+            lobby.removePlayer(player);
+            deleteLobby(lobby);
+        }
     });
     socket.on("message", (data) => {
         const message = parseMessage(data);
@@ -55,6 +65,10 @@ io.on("connection", (socket) => {
                 const guessedWord = message.data;
                 console.log("received guess", guessedWord);
                 lobby.guess(player, guessedWord);
+                if (lobby.isFinished) {
+                    lobby.end();
+                    deleteLobby(lobby);
+                }
             } else {
                 console.warn("unexpected message kind", message.kind);
             }

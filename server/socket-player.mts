@@ -44,4 +44,8 @@ export default class SocketPlayer implements Player {
         const data = JSON.stringify([outcome, scores]);
         this.socket.send(createMessage(MessageKind.OVERALL_OUTCOME, data));
     }
+
+    notifyLeave(reason: string): void {
+        this.socket.send(createMessage(MessageKind.LEAVE, reason));
+    }
 }

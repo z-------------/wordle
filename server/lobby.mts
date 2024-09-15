@@ -7,7 +7,8 @@ const PLAYERS_COUNT = 2; // must be 2
 const ROUNDS_COUNT = 2;
 
 export default class Lobby {
-    private readonly players = [] as Player[];
+    private _isFinished = false;
+    private players = [] as Player[];
     private readonly rounds = [] as Round[];
     private readonly overallScores: number[] = Array(PLAYERS_COUNT).fill(0);
 
@@ -20,6 +21,10 @@ export default class Lobby {
         return this.players.length >= PLAYERS_COUNT;
     }
 
+    get isFinished(): boolean {
+        return this._isFinished;
+    }
+
     addPlayer(player: Player) {
         if (this.players.length < PLAYERS_COUNT) {
             const playerIdx = this.players.length;
@@ -29,6 +34,19 @@ export default class Lobby {
                 this.startNewRound();
             }
         }
+    }
+
+    removePlayer(player: Player) {
+        this.players = this.players.filter((otherPlayer) => otherPlayer !== player);
+        this.players.forEach((otherPlayer) => {
+            otherPlayer.notifyLeave("Opponent left");
+        });
+    }
+
+    end() {
+        this.players.forEach((player) => {
+            player.notifyLeave("Lobby ended");
+        });
     }
 
     private startNewRound() {
@@ -67,6 +85,7 @@ export default class Lobby {
                 roundScores.forEach((score, i) => this.overallScores[i] += score);
                 this.notifyRoundOutcome(roundScores);
                 if (this.rounds.length >= ROUNDS_COUNT) {
+                    this._isFinished = true;
                     this.notifyOverallOutcome();
                 } else {
                     this.startNewRound();
