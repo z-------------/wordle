@@ -11,6 +11,10 @@ export interface Message {
     data: string;
 }
 
+export function createMessage(kind: MessageKind, data: string): Message {
+    return { kind, data };
+}
+
 function isMessage(obj: unknown): obj is Message {
     return !!obj
         && typeof obj === "object"
@@ -21,10 +25,9 @@ function isMessage(obj: unknown): obj is Message {
         && typeof obj.data === "string";
 }
 
-export function parseMessage(data: string): Message | undefined {
-    console.log("parseMessage", data);
+export function parseMessage(obj: unknown): Message | undefined {
+    console.log("parseMessage", obj);
     try {
-        const obj: unknown = JSON.parse(data);
         if (isMessage(obj)) {
             return {
                 kind: obj.kind,

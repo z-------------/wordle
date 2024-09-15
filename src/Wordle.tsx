@@ -1,34 +1,35 @@
 import { useEffect, useState } from "react";
-import useWebSocket, { ReadyState } from "react-use-websocket";
-import { Message, MessageKind, parseMessage } from "../common/message.mts";
+import { MessageKind, parseMessage } from "../common/message.mts";
 import { Verdict } from "../common/verdict.mts";
 import Word from "./Word";
-
-const wsUrl = "ws://localhost:8000";
+import { socket } from "./socket";
 
 export default function Wordle() {
-  const { lastMessage, readyState, sendJsonMessage } = useWebSocket(wsUrl);
-  const [message, setMessage] = useState(undefined as Message | undefined);
   const [guessedWord, setGuessedWord] = useState("");
   const [wordHistory, setWordHistory] = useState([] as { word: string, verdicts: Verdict[] }[]);
 
   useEffect(() => {
-    if (readyState === ReadyState.OPEN && lastMessage?.data) {
-      const message = parseMessage(lastMessage.data);
-      setMessage(message);
+    function handleMessage(data: unknown) {
+      const message = parseMessage(data);
       if (message && message.kind === MessageKind.VERDICTS) {
-        const verdicts = JSON.parse(message.data);
+        const [guessedWord, verdicts] = JSON.parse(message.data);
         setWordHistory((prev) => prev.concat({
           word: guessedWord,
           verdicts,
         }));
       }
     }
-  }, [lastMessage]);
+
+    socket.on("message", handleMessage);
+
+    return () => {
+      socket.off("message", handleMessage);
+    };
+  }, []);
 
   function handleClickEnter() {
     if (guessedWord) {
-      sendJsonMessage({
+      socket.send({
         kind: "GUESS",
         data: guessedWord,
       });
@@ -37,9 +38,6 @@ export default function Wordle() {
 
   return (
     <>
-      <div>Connection state = {readyState}</div>
-      <div>Last message = {lastMessage?.data}</div>
-      <div>Last message kind = {message?.kind}</div>
       <input
         value={guessedWord}
         onChange={(e) => setGuessedWord(e.target.value.toUpperCase())}
