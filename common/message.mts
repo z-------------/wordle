@@ -8,6 +8,9 @@ export enum MessageKind {
     OUTCOME = "OUTCOME",
     GUESSES_LEFT = "GUESSES_LEFT",
     OPPONENT_GUESSES_LEFT = "OPPONENT_GUESSES_LEFT",
+    ROUND = "ROUND",
+    ROUND_OUTCOME = "ROUND_OUTCOME",
+    OVERALL_OUTCOME = "OVERALL_OUTCOME",
 }
 
 export interface Message {

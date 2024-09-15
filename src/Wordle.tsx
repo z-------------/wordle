@@ -16,6 +16,7 @@ export default function Wordle() {
   const [wordHistory, setWordHistory] = useState([] as WordHistoryEntry[]);
   const [opponentGuessesLeft, setOpponentGuessesLeft] = useState(0);
   const [opponentWordHistory, setOpponentWordHistory] = useState([] as WordHistoryEntry[]);
+  const [roundInfo, setRoundInfo] = useState({ currentRound: 0, totalRounds: 0 });
 
   useEffect(() => {
     function handleMessage(data: unknown) {
@@ -34,6 +35,9 @@ export default function Wordle() {
           setGuessesLeft(Number(message.data));
         } else if (message.kind === MessageKind.OPPONENT_GUESSES_LEFT) {
           setOpponentGuessesLeft(Number(message.data));
+        } else if (message.kind === MessageKind.ROUND) {
+          const [currentRound, totalRounds] = JSON.parse(message.data);
+          setRoundInfo({ currentRound, totalRounds });
         }
       }
     }
@@ -65,6 +69,7 @@ export default function Wordle() {
       >
         Start
       </button>
+      <p>Round {roundInfo.currentRound} out of {roundInfo.totalRounds}</p>
       <input
         value={guessedWord}
         onChange={(e) => setGuessedWord(e.target.value.toUpperCase())}

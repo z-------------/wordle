@@ -41,7 +41,7 @@ io.on("connection", (socket) => {
     let lobby: Lobby | undefined;
     let playerIdx = -1;
     const player: Player = {
-        notifyPlayerIdx: function(pidx: number): void {
+        notifyPlayerIdx: function (pidx: number): void {
             playerIdx = pidx;
         },
         notifyInvalidGuess: function (error: string): void {
@@ -61,6 +61,16 @@ io.on("connection", (socket) => {
             const kind = pidx === playerIdx ? MessageKind.GUESSES_LEFT : MessageKind.OPPONENT_GUESSES_LEFT;
             socket.send(createMessage(kind, guessesLeft.toString()));
         },
+        notifyRound: function (currentRound: number, totalRounds: number): void {
+            const data = JSON.stringify([currentRound, totalRounds]);
+            socket.send(createMessage(MessageKind.ROUND, data));
+        },
+        notifyRoundOutcome: function (): void {
+            socket.send(createMessage(MessageKind.ROUND_OUTCOME, ""));
+        },
+        notifyOverallOutcome: function (): void {
+            socket.send(createMessage(MessageKind.OVERALL_OUTCOME, ""));
+        }
     };
 
     socket.on("disconnect", () => {

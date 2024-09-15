@@ -7,4 +7,7 @@ export default interface Player {
     notifyTurn(): void;
     notifyOutcome(win: boolean): void;
     notifyGuessesLeft(playerIdx: number, guessesLeft: number): void;
+    notifyRound(currentRound: number, totalRounds: number): void;
+    notifyRoundOutcome(): void;
+    notifyOverallOutcome(): void;
 }

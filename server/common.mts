@@ -2,6 +2,10 @@ import * as fs from "node:fs/promises";
 
 export const WORD_LENGTH = 5;
 
+export function sample<T>(choices: T[]): T {
+    return choices[Math.floor(Math.random() * choices.length)];
+}
+
 function isAllLetters(s: string): boolean {
     return /^[A-Za-z]*$/.test(s);
 }
