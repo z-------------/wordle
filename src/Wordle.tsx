@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createMessage, MessageKind, parseMessage } from "../common/message.mts";
 import { socket } from "./socket";
 import WordHistory, { WordHistoryEntry } from "./WordHistory";
+import { Scoreboard } from "./Scoreboard";
 
 enum Phase {
   BEFORE_START,
@@ -13,10 +14,12 @@ export default function Wordle() {
   const [phase, setPhase] = useState(Phase.BEFORE_START);
   const [guessedWord, setGuessedWord] = useState("");
   const [guessesLeft, setGuessesLeft] = useState(0);
-  const [wordHistory, setWordHistory] = useState([] as WordHistoryEntry[]);
   const [opponentGuessesLeft, setOpponentGuessesLeft] = useState(0);
+  const [wordHistory, setWordHistory] = useState([] as WordHistoryEntry[]);
   const [opponentWordHistory, setOpponentWordHistory] = useState([] as WordHistoryEntry[]);
   const [roundInfo, setRoundInfo] = useState({ currentRound: 0, totalRounds: 0 });
+  const [roundScores, setRoundScores] = useState([] as number[][]);
+  const [overallScores, setOverallScores] = useState([] as number[]);
 
   useEffect(() => {
     function handleMessage(data: unknown) {
@@ -30,6 +33,9 @@ export default function Wordle() {
         }));
       } else if (message?.kind === MessageKind.TURN) {
         setPhase(Phase.CAN_GUESS);
+        setGuessedWord("");
+      } else if (message?.kind === MessageKind.OUTCOME) {
+        setGuessedWord("");
       } else if (message?.kind === MessageKind.GUESSES_LEFT) {
         const [isOurs, guessesLeft] = JSON.parse(message.data);
         const setter = isOurs ? setGuessesLeft : setOpponentGuessesLeft;
@@ -37,6 +43,14 @@ export default function Wordle() {
       } else if (message?.kind === MessageKind.ROUND) {
         const [currentRound, totalRounds] = JSON.parse(message.data);
         setRoundInfo({ currentRound, totalRounds });
+        setWordHistory([]);
+        setOpponentWordHistory([]);
+      } else if (message?.kind === MessageKind.ROUND_OUTCOME) {
+        const scores: number[] = JSON.parse(message.data);
+        setRoundScores((prev) => prev.concat([scores]));
+      } else if (message?.kind === MessageKind.OVERALL_OUTCOME) {
+        const scores: number[] = JSON.parse(message.data);
+        setOverallScores(scores);
       }
     }
     socket.on("message", handleMessage);
@@ -65,7 +79,8 @@ export default function Wordle() {
       >
         Start
       </button>
-      <p>Round {roundInfo.currentRound} out of {roundInfo.totalRounds}</p>
+      <Scoreboard roundScores={roundScores} overallScores={overallScores} />
+      <p>Round {roundInfo.currentRound} of {roundInfo.totalRounds}</p>
       <input
         value={guessedWord}
         onChange={(e) => setGuessedWord(e.target.value.toUpperCase())}

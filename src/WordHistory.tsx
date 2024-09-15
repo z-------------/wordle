@@ -9,20 +9,17 @@ export interface WordHistoryEntry {
 
 export default function WordHistory(props: { guessesLeft: number, wordHistory: WordHistoryEntry[] }) {
   return (
-    <>
-      <ol>
-        {props.wordHistory.map(({ word, verdicts }, i) => (
-          <li key={i}>
-            <Word word={word} verdicts={verdicts} />
-          </li>
-        ))}
-        {[...Array(props.guessesLeft)].map((_n, i) => (
-          <li key={props.wordHistory.length + i}>
-            <Word word={Array(WORD_LENGTH + 1).join(" ")} verdicts={Array(WORD_LENGTH).fill(Verdict.EMPTY)} />
-          </li>
-        ))}
-      </ol>
-      <div>{props.guessesLeft} guesses left</div>
-    </>
+    <div>
+      {props.wordHistory.map(({ word, verdicts }, i) => (
+        <Word key={i} word={word} verdicts={verdicts} />
+      ))}
+      {[...Array(props.guessesLeft)].map((_n, i) => (
+        <Word
+          key={props.wordHistory.length + i}
+          word={Array(WORD_LENGTH + 1).join(" ")}
+          verdicts={Array(WORD_LENGTH).fill(Verdict.EMPTY)}
+        />
+      ))}
+    </div>
   );
 }
