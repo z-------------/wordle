@@ -1,25 +1,12 @@
-import { InvalidArgumentError, program } from "commander";
 import express from "express";
 import * as http from "node:http";
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
 import { createMessage, MessageKind, parseMessage } from "../common/message.mjs";
 import { readWordList } from "./common.mjs";
 import Game, { State } from "./game.mjs";
+import { parseOpts } from "./opts.mjs";
 
-function parsePositiveOption(s: string): number {
-    const value = parseInt(s);
-    if (Number.isNaN(value) || value < 1) {
-        throw new InvalidArgumentError("Not a positive integer.");
-    }
-    return value;
-}
-
-program
-    .option("--maxGuesses <n>", "maximum number of guesses", parsePositiveOption)
-    .requiredOption("--wordsList <filename>", "filename containing the newline-delimited word list");
-program.parse();
-const opts = program.opts();
-const maxGuesses = opts.maxGuesses || 5;
+const opts = parseOpts();
 const wordList = await readWordList(opts.wordsList);
 
 const PORT = 8000;
@@ -30,7 +17,7 @@ const io = new Server(server);
 io.on("connection", (socket) => {
     console.log("client connected");
 
-    const game = new Game(maxGuesses, wordList);
+    const game = new Game(opts.maxGuesses, wordList);
     socket.send(createMessage(MessageKind.TURN, game.guessesLeft.toString()));
 
     socket.on("disconnect", () => console.log("client disconnected"));
