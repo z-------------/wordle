@@ -1,12 +1,12 @@
 import express from "express";
 import * as http from "node:http";
 import { Server } from "socket.io";
-import { createMessage, MessageKind, parseMessage } from "../common/message.mjs";
-import { Verdict } from "../common/verdict.mjs";
+import { MessageKind, parseMessage } from "../common/message.mjs";
 import { readWordList } from "./common.mjs";
 import Lobby from "./lobby.mjs";
 import { parseOpts } from "./opts.mjs";
 import Player from "./player.mjs";
+import SocketPlayer from "./socket-player.mjs";
 
 const opts = parseOpts();
 const wordList = await readWordList(opts.wordsList);
@@ -39,40 +39,7 @@ io.on("connection", (socket) => {
     console.log("client connected");
 
     let lobby: Lobby | undefined;
-    const player: Player = {
-        playerIdx: -1,
-        notifyPlayerIdx: function (pidx: number): void {
-            this.playerIdx = pidx;
-            socket.send(createMessage(MessageKind.PLAYER_IDX, this.playerIdx.toString()));
-        },
-        notifyInvalidGuess: function (error: string): void {
-            socket.send(createMessage(MessageKind.INVALID_GUESS, error));
-        },
-        notifyVerdicts: function (playerIdx: number, guessedWord: string, verdicts: Verdict[]): void {
-            const data = JSON.stringify([playerIdx, guessedWord, verdicts]);
-            socket.send(createMessage(MessageKind.VERDICTS, data));
-        },
-        notifyTurn: function (): void {
-            socket.send(createMessage(MessageKind.TURN, ""));
-        },
-        notifyOutcome: function (win: boolean): void {
-            socket.send(createMessage(MessageKind.OUTCOME, win ? "win" : "lose"));
-        },
-        notifyGuessesLeft: function (playerIdx: number, guessesLeft: number): void {
-            const data = JSON.stringify([playerIdx, guessesLeft]);
-            socket.send(createMessage(MessageKind.GUESSES_LEFT, data));
-        },
-        notifyRound: function (currentRound: number, totalRounds: number): void {
-            const data = JSON.stringify([currentRound, totalRounds]);
-            socket.send(createMessage(MessageKind.ROUND, data));
-        },
-        notifyRoundOutcome: function (): void {
-            socket.send(createMessage(MessageKind.ROUND_OUTCOME, ""));
-        },
-        notifyOverallOutcome: function (): void {
-            socket.send(createMessage(MessageKind.OVERALL_OUTCOME, ""));
-        }
-    };
+    const player = new SocketPlayer(socket);
 
     socket.on("disconnect", () => {
         console.log("client disconnected");
