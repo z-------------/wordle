@@ -52,8 +52,12 @@ export default class Lobby {
             if (error) {
                 player.notifyInvalidGuess(error);
             } else if (verdicts) {
+                player.notifyVerdicts(playerIdx, guessedWord, verdicts);
+                const emptyWord = Array(guessedWord.length + 1).join(" ");
                 this.players.forEach((otherPlayer) => {
-                    otherPlayer.notifyVerdicts(playerIdx, guessedWord, verdicts);
+                    if (otherPlayer !== player) {
+                        otherPlayer.notifyVerdicts(playerIdx, emptyWord, verdicts);
+                    }
                 });
             }
             if (game.state === State.IN_PROGRESS) {
