@@ -65,19 +65,19 @@ export default class Lobby {
         });
     }
 
-    guess(playerIdx: number, guessedWord: string) {
+    guess(player: Player, guessedWord: string) {
         const round = this.currentRound;
-        if (round && !this.isFinished && playerIdx >= 0 && playerIdx < PLAYERS_COUNT) {
-            const player = this.players[playerIdx];
-            const game = round.games[playerIdx];
+        const isValidPlayer = player && player.playerIdx >= 0 && player.playerIdx < PLAYERS_COUNT;
+        if (round && !this.isFinished && isValidPlayer) {
+            const game = round.games[player.playerIdx];
             const { verdicts, error } = game.guess(guessedWord);
             if (error) {
                 player.notifyInvalidGuess(error);
             } else if (verdicts) {
-                this.notifyVerdicts(player, playerIdx, guessedWord, verdicts);
+                this.notifyVerdicts(player, guessedWord, verdicts);
             }
             this.players.forEach((otherPlayer) => {
-                otherPlayer.notifyGuessesLeft(playerIdx, game.guessesLeft);
+                otherPlayer.notifyGuessesLeft(player.playerIdx, game.guessesLeft);
             });
             if (game.state === State.IN_PROGRESS) {
                 player.notifyTurn();
@@ -95,12 +95,12 @@ export default class Lobby {
         }
     }
 
-    private notifyVerdicts(player: Player, playerIdx: number, guessedWord: string, verdicts: Verdict[]) {
-        player.notifyVerdicts(playerIdx, guessedWord, verdicts);
+    private notifyVerdicts(player: Player, guessedWord: string, verdicts: Verdict[]) {
+        player.notifyVerdicts(player.playerIdx, guessedWord, verdicts);
         const emptyWord = Array(guessedWord.length + 1).join(" ");
         this.players.forEach((otherPlayer) => {
             if (otherPlayer !== player) {
-                otherPlayer.notifyVerdicts(playerIdx, emptyWord, verdicts);
+                otherPlayer.notifyVerdicts(player.playerIdx, emptyWord, verdicts);
             }
         });
     }

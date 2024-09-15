@@ -39,17 +39,18 @@ io.on("connection", (socket) => {
     console.log("client connected");
 
     let lobby: Lobby | undefined;
-    let playerIdx = -1;
     const player: Player = {
+        playerIdx: -1,
         notifyPlayerIdx: function (pidx: number): void {
-            playerIdx = pidx;
+            this.playerIdx = pidx;
+            socket.send(createMessage(MessageKind.PLAYER_IDX, this.playerIdx.toString()));
         },
         notifyInvalidGuess: function (error: string): void {
             socket.send(createMessage(MessageKind.INVALID_GUESS, error));
         },
-        notifyVerdicts: function (pidx: number, guessedWord: string, verdicts: Verdict[]): void {
-            const kind = pidx === playerIdx ? MessageKind.VERDICTS : MessageKind.OPPONENT_VERDICTS;
-            socket.send(createMessage(kind, JSON.stringify([guessedWord, verdicts])));
+        notifyVerdicts: function (playerIdx: number, guessedWord: string, verdicts: Verdict[]): void {
+            const data = JSON.stringify([playerIdx, guessedWord, verdicts]);
+            socket.send(createMessage(MessageKind.VERDICTS, data));
         },
         notifyTurn: function (): void {
             socket.send(createMessage(MessageKind.TURN, ""));
@@ -57,9 +58,9 @@ io.on("connection", (socket) => {
         notifyOutcome: function (win: boolean): void {
             socket.send(createMessage(MessageKind.OUTCOME, win ? "win" : "lose"));
         },
-        notifyGuessesLeft: function (pidx: number, guessesLeft: number): void {
-            const kind = pidx === playerIdx ? MessageKind.GUESSES_LEFT : MessageKind.OPPONENT_GUESSES_LEFT;
-            socket.send(createMessage(kind, guessesLeft.toString()));
+        notifyGuessesLeft: function (playerIdx: number, guessesLeft: number): void {
+            const data = JSON.stringify([playerIdx, guessesLeft]);
+            socket.send(createMessage(MessageKind.GUESSES_LEFT, data));
         },
         notifyRound: function (currentRound: number, totalRounds: number): void {
             const data = JSON.stringify([currentRound, totalRounds]);
@@ -86,7 +87,7 @@ io.on("connection", (socket) => {
             } else if (message.kind === MessageKind.GUESS && lobby) {
                 const guessedWord = message.data;
                 console.log("received guess", guessedWord);
-                lobby.guess(playerIdx, guessedWord);
+                lobby.guess(player, guessedWord);
             } else {
                 console.warn("unexpected message kind", message.kind);
             }

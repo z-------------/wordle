@@ -1,16 +1,17 @@
 export enum MessageKind {
+    // client -> server
     HELLO = "HELLO",
-    TURN = "TURN",
     GUESS = "GUESS",
+    // server -> client
+    TURN = "TURN",
     INVALID_GUESS = "INVALID_GUESS",
     VERDICTS = "VERDICTS",
-    OPPONENT_VERDICTS = "OPPONENT_VERDICTS",
     OUTCOME = "OUTCOME",
     GUESSES_LEFT = "GUESSES_LEFT",
-    OPPONENT_GUESSES_LEFT = "OPPONENT_GUESSES_LEFT",
     ROUND = "ROUND",
     ROUND_OUTCOME = "ROUND_OUTCOME",
     OVERALL_OUTCOME = "OVERALL_OUTCOME",
+    PLAYER_IDX = "PLAYER_IDX",
 }
 
 export interface Message {
