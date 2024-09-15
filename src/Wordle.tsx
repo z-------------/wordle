@@ -17,14 +17,13 @@ export default function Wordle() {
   const [opponentGuessesLeft, setOpponentGuessesLeft] = useState(0);
   const [opponentWordHistory, setOpponentWordHistory] = useState([] as WordHistoryEntry[]);
   const [roundInfo, setRoundInfo] = useState({ currentRound: 0, totalRounds: 0 });
-  const [playerIdx, setPlayerIdx] = useState(-1);
 
   useEffect(() => {
     function handleMessage(data: unknown) {
       const message = parseMessage(data);
       if (message?.kind === MessageKind.VERDICTS) {
-        const [pidx, guessedWord, verdicts] = JSON.parse(message.data);
-        const setter = pidx === playerIdx ? setWordHistory : setOpponentWordHistory;
+        const [isOurs, guessedWord, verdicts] = JSON.parse(message.data);
+        const setter = isOurs ? setWordHistory : setOpponentWordHistory;
         setter((prev) => prev.concat({
           word: guessedWord,
           verdicts,
@@ -32,21 +31,19 @@ export default function Wordle() {
       } else if (message?.kind === MessageKind.TURN) {
         setPhase(Phase.CAN_GUESS);
       } else if (message?.kind === MessageKind.GUESSES_LEFT) {
-        const [pidx, guessesLeft] = JSON.parse(message.data);
-        const setter = pidx === playerIdx ? setGuessesLeft : setOpponentGuessesLeft;
+        const [isOurs, guessesLeft] = JSON.parse(message.data);
+        const setter = isOurs ? setGuessesLeft : setOpponentGuessesLeft;
         setter(guessesLeft);
       } else if (message?.kind === MessageKind.ROUND) {
         const [currentRound, totalRounds] = JSON.parse(message.data);
         setRoundInfo({ currentRound, totalRounds });
-      } else if (message?.kind === MessageKind.PLAYER_IDX) {
-        setPlayerIdx(Number(message.data));
       }
     }
     socket.on("message", handleMessage);
     return () => {
       socket.off("message", handleMessage);
     };
-  }, [playerIdx]);
+  }, []);
 
   function handleClickStart() {
     setPhase(Phase.WAITING);

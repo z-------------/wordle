@@ -11,7 +11,6 @@ export enum MessageKind {
     ROUND = "ROUND",
     ROUND_OUTCOME = "ROUND_OUTCOME",
     OVERALL_OUTCOME = "OVERALL_OUTCOME",
-    PLAYER_IDX = "PLAYER_IDX",
 }
 
 export interface Message {

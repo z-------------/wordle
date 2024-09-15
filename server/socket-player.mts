@@ -10,15 +10,14 @@ export default class SocketPlayer implements Player {
 
     notifyPlayerIdx(pidx: number) {
         this.playerIdx = pidx;
-        this.socket.send(createMessage(MessageKind.PLAYER_IDX, this.playerIdx.toString()));
     }
 
     notifyInvalidGuess(error: string) {
         this.socket.send(createMessage(MessageKind.INVALID_GUESS, error));
     }
 
-    notifyVerdicts(playerIdx: number, guessedWord: string, verdicts: Verdict[]) {
-        const data = JSON.stringify([playerIdx, guessedWord, verdicts]);
+    notifyVerdicts(pidx: number, guessedWord: string, verdicts: Verdict[]) {
+        const data = JSON.stringify([pidx === this.playerIdx, guessedWord, verdicts]);
         this.socket.send(createMessage(MessageKind.VERDICTS, data));
     }
 
@@ -30,8 +29,8 @@ export default class SocketPlayer implements Player {
         this.socket.send(createMessage(MessageKind.OUTCOME, win ? "win" : "lose"));
     }
 
-    notifyGuessesLeft(playerIdx: number, guessesLeft: number) {
-        const data = JSON.stringify([playerIdx, guessesLeft]);
+    notifyGuessesLeft(pidx: number, guessesLeft: number) {
+        const data = JSON.stringify([pidx === this.playerIdx, guessesLeft]);
         this.socket.send(createMessage(MessageKind.GUESSES_LEFT, data));
     }
 
