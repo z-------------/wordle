@@ -61,8 +61,6 @@ export default class Lobby {
             });
             if (game.state === State.IN_PROGRESS) {
                 player.notifyTurn();
-            } else {
-                player.notifyOutcome(game.state === State.WIN);
             }
             if (round.isFinished) {
                 const roundScores = round.scores;

@@ -6,7 +6,6 @@ export enum MessageKind {
     TURN = "TURN",
     INVALID_GUESS = "INVALID_GUESS",
     VERDICTS = "VERDICTS",
-    OUTCOME = "OUTCOME",
     GUESSES_LEFT = "GUESSES_LEFT",
     ROUND = "ROUND",
     ROUND_OUTCOME = "ROUND_OUTCOME",

@@ -6,7 +6,6 @@ export default interface Player {
     notifyInvalidGuess(error: string): void;
     notifyVerdicts(playerIdx: number, guessedWord: string, verdicts: Verdict[]): void;
     notifyTurn(): void;
-    notifyOutcome(win: boolean): void;
     notifyGuessesLeft(playerIdx: number, guessesLeft: number): void;
     notifyRound(currentRound: number, totalRounds: number): void;
     notifyRoundOutcome(scores: number[]): void;

@@ -25,10 +25,6 @@ export default class SocketPlayer implements Player {
         this.socket.send(createMessage(MessageKind.TURN, ""));
     }
 
-    notifyOutcome(win: boolean) {
-        this.socket.send(createMessage(MessageKind.OUTCOME, win ? "win" : "lose"));
-    }
-
     notifyGuessesLeft(pidx: number, guessesLeft: number) {
         const data = JSON.stringify([pidx === this.playerIdx, guessesLeft]);
         this.socket.send(createMessage(MessageKind.GUESSES_LEFT, data));
