@@ -29,9 +29,10 @@ export default function Wordle() {
             verdicts,
           }));
         } else if (message.kind === MessageKind.TURN) {
-          setGuessesLeft(Number(message.data));
           setPhase(Phase.CAN_GUESS);
-        } else if (message.kind === MessageKind.OPPONENT_TURN) {
+        } else if (message.kind === MessageKind.GUESSES_LEFT) {
+          setGuessesLeft(Number(message.data));
+        } else if (message.kind === MessageKind.OPPONENT_GUESSES_LEFT) {
           setOpponentGuessesLeft(Number(message.data));
         }
       }

@@ -51,13 +51,16 @@ io.on("connection", (socket) => {
             const kind = pidx === playerIdx ? MessageKind.VERDICTS : MessageKind.OPPONENT_VERDICTS;
             socket.send(createMessage(kind, JSON.stringify([guessedWord, verdicts])));
         },
-        notifyTurn: function (pidx: number, guessesLeft: number): void {
-            const kind = pidx === playerIdx ? MessageKind.TURN : MessageKind.OPPONENT_TURN;
-            socket.send(createMessage(kind, guessesLeft.toString()));
+        notifyTurn: function (): void {
+            socket.send(createMessage(MessageKind.TURN, ""));
         },
         notifyOutcome: function (win: boolean): void {
             socket.send(createMessage(MessageKind.OUTCOME, win ? "win" : "lose"));
-        }
+        },
+        notifyGuessesLeft: function (pidx: number, guessesLeft: number): void {
+            const kind = pidx === playerIdx ? MessageKind.GUESSES_LEFT : MessageKind.OPPONENT_GUESSES_LEFT;
+            socket.send(createMessage(kind, guessesLeft.toString()));
+        },
     };
 
     socket.on("disconnect", () => {

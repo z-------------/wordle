@@ -1,4 +1,4 @@
-import Game, { GuessResult, State } from "./game.mjs";
+import Game, { State } from "./game.mjs";
 import Player from "./player.mjs";
 
 const MAX_PLAYERS = 2;
@@ -38,8 +38,9 @@ export default class Lobby {
     notifyGameStart() {
         this.players.forEach((player, playerIdx) => {
             const game = this.games[playerIdx];
+            player.notifyTurn();
             this.players.forEach((otherPlayer) => {
-                otherPlayer.notifyTurn(playerIdx, game.guessesLeft);
+                otherPlayer.notifyGuessesLeft(playerIdx, game.guessesLeft);
             });
         });
     }
@@ -60,10 +61,11 @@ export default class Lobby {
                     }
                 });
             }
+            this.players.forEach((otherPlayer) => {
+                otherPlayer.notifyGuessesLeft(playerIdx, game.guessesLeft);
+            });
             if (game.state === State.IN_PROGRESS) {
-                this.players.forEach((otherPlayer) => {
-                    otherPlayer.notifyTurn(playerIdx, game.guessesLeft);
-                });
+                player.notifyTurn();
             } else {
                 player.notifyOutcome(game.state === State.WIN);
             }
