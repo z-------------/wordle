@@ -2,8 +2,7 @@ import { Outcome } from "../common/types.mts";
 
 export function Scoreboard(props: {
   roundScores: number[][],
-  overallScores: number[],
-  outcome: Outcome,
+  overallOutcome: { outcome: Outcome, scores: number[] },
 }) {
   function formatOutcome(outcome: Outcome): string {
     return outcome === Outcome.WIN ? "You win" :
@@ -23,17 +22,17 @@ export function Scoreboard(props: {
               <td>{opponentScore}</td>
             </tr>
           ))}
-          {props.overallScores.length > 0 ? (
+          {props.overallOutcome.scores.length > 0 ? (
             <tr key="overall">
               <th>Overall</th>
-              {props.overallScores.map((score, i) => (
+              {props.overallOutcome.scores.map((score, i) => (
                 <td key={i}>{score}</td>
               ))}
             </tr>
           ) : []}
         </tbody>
       </table>
-      {props.outcome === Outcome.UNDECIDED ? null : <strong>{formatOutcome(props.outcome)}</strong>}
+      {props.overallOutcome.outcome === Outcome.UNDECIDED ? null : <strong>{formatOutcome(props.overallOutcome.outcome)}</strong>}
     </>
   );
 }

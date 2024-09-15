@@ -20,8 +20,7 @@ export default function Wordle() {
   const [opponentWordHistory, setOpponentWordHistory] = useState([] as WordHistoryEntry[]);
   const [roundInfo, setRoundInfo] = useState({ currentRound: 0, totalRounds: 0 });
   const [roundScores, setRoundScores] = useState([] as number[][]);
-  const [overallScores, setOverallScores] = useState([] as number[]);
-  const [outcome, setOutcome] = useState(Outcome.UNDECIDED);
+  const [overallOutcome, setOverallOutcome] = useState({ outcome: Outcome.UNDECIDED, scores: [] as number[] });
 
   useEffect(() => {
     function handleMessage(data: unknown) {
@@ -52,8 +51,7 @@ export default function Wordle() {
         setRoundScores((prev) => prev.concat([scores]));
       } else if (message?.kind === MessageKind.OVERALL_OUTCOME) {
         const [outcome, scores]: [Outcome, number[]] = JSON.parse(message.data);
-        setOverallScores(scores);
-        setOutcome(outcome);
+        setOverallOutcome({ outcome, scores });
         setGuessesLeft(0);
         setWordHistory([]);
         setOpponentWordHistory([]);
@@ -86,7 +84,7 @@ export default function Wordle() {
       >
         Start
       </button>
-      <Scoreboard roundScores={roundScores} overallScores={overallScores} outcome={outcome} />
+      <Scoreboard roundScores={roundScores} overallOutcome={overallOutcome} />
       <p>Round {roundInfo.currentRound} of {roundInfo.totalRounds}</p>
       <input
         value={guessedWord}
