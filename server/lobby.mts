@@ -3,11 +3,19 @@ import { sample } from "./common.mjs";
 import Game, { State } from "./game.mjs";
 import Player from "./player.mjs";
 
-const MAX_PLAYERS = 2;
-const MAX_ROUNDS = 2;
+const PLAYERS_COUNT = 2;
+const ROUNDS_COUNT = 2;
 
 class Round {
-    constructor(readonly games: Game[]) {}
+    readonly games: Game[];
+
+    constructor(maxGuesses: number, wordList: string[]) {
+        const word = sample(wordList);
+        this.games = Array(PLAYERS_COUNT)
+            .fill(undefined)
+            .map(() => new Game(maxGuesses, word, wordList));
+        console.log("new round", { word });
+    }
 
     get isFinished(): boolean {
         return this.games.every(game => game.state !== State.IN_PROGRESS);
@@ -17,26 +25,23 @@ class Round {
 export default class Lobby {
     private readonly players = [] as Player[];
     private readonly rounds = [] as Round[];
-    private readonly word: string;
 
     constructor(
         private readonly maxGuesses: number,
         private readonly wordList: string[],
-    ) {
-        this.word = sample(wordList);
-    }
+    ) {}
 
     get isFull(): boolean {
-        return this.players.length >= MAX_PLAYERS;
+        return this.players.length >= PLAYERS_COUNT;
     }
 
     get isFinished(): boolean {
         const round = this.currentRound;
-        return !!round && round.isFinished && this.rounds.length >= MAX_ROUNDS;
+        return !!round && round.isFinished && this.rounds.length >= ROUNDS_COUNT;
     }
 
     addPlayer(player: Player) {
-        if (this.players.length < MAX_PLAYERS) {
+        if (this.players.length < PLAYERS_COUNT) {
             const playerIdx = this.players.length;
             this.players.push(player);
             player.notifyPlayerIdx(playerIdx);
@@ -47,15 +52,12 @@ export default class Lobby {
     }
 
     private startNewRound() {
-        const games = Array(MAX_PLAYERS)
-            .fill(undefined)
-            .map(() => new Game(this.maxGuesses, this.word, this.wordList));
-        const round = new Round(games);
+        const round = new Round(this.maxGuesses, this.wordList);
         this.rounds.push(round);
 
         this.players.forEach((player, playerIdx) => {
-            const game = games[playerIdx];
-            player.notifyRound(this.rounds.length, MAX_ROUNDS);
+            const game = round.games[playerIdx];
+            player.notifyRound(this.rounds.length, ROUNDS_COUNT);
             player.notifyTurn();
             this.players.forEach((otherPlayer) => {
                 otherPlayer.notifyGuessesLeft(playerIdx, game.guessesLeft);
@@ -65,7 +67,7 @@ export default class Lobby {
 
     guess(playerIdx: number, guessedWord: string) {
         const round = this.currentRound;
-        if (round && !this.isFinished && playerIdx >= 0 && playerIdx < MAX_PLAYERS) {
+        if (round && !this.isFinished && playerIdx >= 0 && playerIdx < PLAYERS_COUNT) {
             const player = this.players[playerIdx];
             const game = round.games[playerIdx];
             const { verdicts, error } = game.guess(guessedWord);
@@ -84,7 +86,7 @@ export default class Lobby {
             }
             if (round.isFinished) {
                 this.players.forEach((player) => player.notifyRoundOutcome());
-                if (this.rounds.length < MAX_ROUNDS) {
+                if (this.rounds.length < ROUNDS_COUNT) {
                     this.startNewRound();
                 } else {
                     this.players.forEach((player) => player.notifyOverallOutcome());
