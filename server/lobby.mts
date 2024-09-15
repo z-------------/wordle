@@ -1,30 +1,15 @@
 import { Verdict } from "../common/verdict.mjs";
-import { sample } from "./common.mjs";
-import Game, { State } from "./game.mjs";
+import { State } from "./game.mjs";
 import Player from "./player.mjs";
+import Round from "./round.mjs";
 
 const PLAYERS_COUNT = 2;
 const ROUNDS_COUNT = 2;
 
-class Round {
-    readonly games: Game[];
-
-    constructor(maxGuesses: number, wordList: string[]) {
-        const word = sample(wordList);
-        this.games = Array(PLAYERS_COUNT)
-            .fill(undefined)
-            .map(() => new Game(maxGuesses, word, wordList));
-        console.log("new round", { word });
-    }
-
-    get isFinished(): boolean {
-        return this.games.every(game => game.state !== State.IN_PROGRESS);
-    }
-}
-
 export default class Lobby {
     private readonly players = [] as Player[];
     private readonly rounds = [] as Round[];
+    private readonly scores: number[] = Array(PLAYERS_COUNT).fill(0);
 
     constructor(
         private readonly maxGuesses: number,
@@ -33,11 +18,6 @@ export default class Lobby {
 
     get isFull(): boolean {
         return this.players.length >= PLAYERS_COUNT;
-    }
-
-    get isFinished(): boolean {
-        const round = this.currentRound;
-        return !!round && round.isFinished && this.rounds.length >= ROUNDS_COUNT;
     }
 
     addPlayer(player: Player) {
@@ -52,7 +32,7 @@ export default class Lobby {
     }
 
     private startNewRound() {
-        const round = new Round(this.maxGuesses, this.wordList);
+        const round = new Round(this.maxGuesses, PLAYERS_COUNT, this.wordList);
         this.rounds.push(round);
 
         this.players.forEach((player, playerIdx) => {
@@ -66,9 +46,9 @@ export default class Lobby {
     }
 
     guess(player: Player, guessedWord: string) {
-        const round = this.currentRound;
         const isValidPlayer = player && player.playerIdx >= 0 && player.playerIdx < PLAYERS_COUNT;
-        if (round && !this.isFinished && isValidPlayer) {
+        const round = this.currentRound;
+        if (isValidPlayer && round) {
             const game = round.games[player.playerIdx];
             const { verdicts, error } = game.guess(guessedWord);
             if (error) {
@@ -85,11 +65,13 @@ export default class Lobby {
                 player.notifyOutcome(game.state === State.WIN);
             }
             if (round.isFinished) {
-                this.players.forEach((player) => player.notifyRoundOutcome());
-                if (this.rounds.length < ROUNDS_COUNT) {
-                    this.startNewRound();
+                const roundScores = round.scores;
+                roundScores.forEach((score, i) => this.scores[i] += score);
+                this.players.forEach((player) => player.notifyRoundOutcome(roundScores));
+                if (this.rounds.length >= ROUNDS_COUNT) {
+                    this.players.forEach((player) => player.notifyOverallOutcome(this.scores));
                 } else {
-                    this.players.forEach((player) => player.notifyOverallOutcome());
+                    this.startNewRound();
                 }
             }
         }

@@ -40,11 +40,13 @@ export default class SocketPlayer implements Player {
         this.socket.send(createMessage(MessageKind.ROUND, data));
     }
 
-    notifyRoundOutcome() {
-        this.socket.send(createMessage(MessageKind.ROUND_OUTCOME, ""));
+    notifyRoundOutcome(scores: number[]) {
+        const data = JSON.stringify(scores);
+        this.socket.send(createMessage(MessageKind.ROUND_OUTCOME, data));
     }
 
-    notifyOverallOutcome() {
-        this.socket.send(createMessage(MessageKind.OVERALL_OUTCOME, ""));
+    notifyOverallOutcome(scores: number[]) {
+        const data = JSON.stringify(scores);
+        this.socket.send(createMessage(MessageKind.OVERALL_OUTCOME, data));
     }
 }
