@@ -1,12 +1,12 @@
 .letter {
     color: white;
-    font-size: 2em;
     display: inline-block;
     margin-right: 0.1em;
     width: 1em;
     height: 1.2em;
     text-align: center;
     vertical-align: middle;
+    border: solid 1px transparent;
 }
 
 .letter-0 {
@@ -19,4 +19,9 @@
 
 .letter-2 {
     background-color: rgb(120, 124, 126);
+}
+
+.letter-3 {
+    background-color: transparent;
+    border-color: rgb(211, 214, 218);
 }

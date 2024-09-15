@@ -1,6 +1,5 @@
 import * as fs from "node:fs/promises";
-
-export const WORD_LENGTH = 5;
+import { WORD_LENGTH } from "../common/consts.mjs";
 
 export function sample<T>(choices: T[]): T {
     return choices[Math.floor(Math.random() * choices.length)];

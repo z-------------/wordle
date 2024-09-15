@@ -22,26 +22,24 @@ export default function Wordle() {
   useEffect(() => {
     function handleMessage(data: unknown) {
       const message = parseMessage(data);
-      if (message) {
-        if (message.kind === MessageKind.VERDICTS) {
-          const [pidx, guessedWord, verdicts] = JSON.parse(message.data);
-          const setter = pidx === playerIdx ? setWordHistory : setOpponentWordHistory;
-          setter((prev) => prev.concat({
-            word: guessedWord,
-            verdicts,
-          }));
-        } else if (message.kind === MessageKind.TURN) {
-          setPhase(Phase.CAN_GUESS);
-        } else if (message.kind === MessageKind.GUESSES_LEFT) {
-          const [pidx, guessesLeft] = JSON.parse(message.data);
-          const setter = pidx === playerIdx ? setGuessesLeft : setOpponentGuessesLeft;
-          setter(guessesLeft);
-        } else if (message.kind === MessageKind.ROUND) {
-          const [currentRound, totalRounds] = JSON.parse(message.data);
-          setRoundInfo({ currentRound, totalRounds });
-        } else if (message.kind === MessageKind.PLAYER_IDX) {
-          setPlayerIdx(Number(message.data));
-        }
+      if (message?.kind === MessageKind.VERDICTS) {
+        const [pidx, guessedWord, verdicts] = JSON.parse(message.data);
+        const setter = pidx === playerIdx ? setWordHistory : setOpponentWordHistory;
+        setter((prev) => prev.concat({
+          word: guessedWord,
+          verdicts,
+        }));
+      } else if (message?.kind === MessageKind.TURN) {
+        setPhase(Phase.CAN_GUESS);
+      } else if (message?.kind === MessageKind.GUESSES_LEFT) {
+        const [pidx, guessesLeft] = JSON.parse(message.data);
+        const setter = pidx === playerIdx ? setGuessesLeft : setOpponentGuessesLeft;
+        setter(guessesLeft);
+      } else if (message?.kind === MessageKind.ROUND) {
+        const [currentRound, totalRounds] = JSON.parse(message.data);
+        setRoundInfo({ currentRound, totalRounds });
+      } else if (message?.kind === MessageKind.PLAYER_IDX) {
+        setPlayerIdx(Number(message.data));
       }
     }
     socket.on("message", handleMessage);

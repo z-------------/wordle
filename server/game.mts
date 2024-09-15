@@ -1,5 +1,6 @@
+import { WORD_LENGTH } from "../common/consts.mjs";
 import { Verdict } from "../common/verdict.mjs";
-import { isValidWord, WORD_LENGTH } from "./common.mjs";
+import { isValidWord } from "./common.mjs";
 
 export enum State {
     IN_PROGRESS,
