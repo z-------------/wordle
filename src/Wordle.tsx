@@ -4,6 +4,7 @@ import { socket } from "./socket";
 import WordHistory, { WordHistoryEntry } from "./WordHistory";
 import { Scoreboard } from "./Scoreboard";
 import { Outcome } from "../common/types.mts";
+import WordInput from "./WordInput";
 
 enum Phase {
   BEFORE_START,
@@ -13,7 +14,6 @@ enum Phase {
 
 export default function Wordle() {
   const [phase, setPhase] = useState(Phase.BEFORE_START);
-  const [guessedWord, setGuessedWord] = useState("");
   const [guessesLeft, setGuessesLeft] = useState(0);
   const [opponentGuessesLeft, setOpponentGuessesLeft] = useState(0);
   const [wordHistory, setWordHistory] = useState([] as WordHistoryEntry[]);
@@ -34,9 +34,6 @@ export default function Wordle() {
         }));
       } else if (message?.kind === MessageKind.TURN) {
         setPhase(Phase.CAN_GUESS);
-        setGuessedWord("");
-      } else if (message?.kind === MessageKind.OUTCOME) {
-        setGuessedWord("");
       } else if (message?.kind === MessageKind.GUESSES_LEFT) {
         const [isOurs, guessesLeft] = JSON.parse(message.data);
         const setter = isOurs ? setGuessesLeft : setOpponentGuessesLeft;
@@ -69,7 +66,7 @@ export default function Wordle() {
     socket.send(createMessage(MessageKind.HELLO, ""));
   }
 
-  function handleClickEnter() {
+  function handleEnter(guessedWord: string) {
     if (guessedWord) {
       setPhase(Phase.WAITING);
       socket.send(createMessage(MessageKind.GUESS, guessedWord));
@@ -86,16 +83,7 @@ export default function Wordle() {
       </button>
       <Scoreboard roundScores={roundScores} overallOutcome={overallOutcome} />
       <p>Round {roundInfo.currentRound} of {roundInfo.totalRounds}</p>
-      <input
-        value={guessedWord}
-        onChange={(e) => setGuessedWord(e.target.value.toUpperCase())}
-      />
-      <button
-        disabled={phase !== Phase.CAN_GUESS}
-        onClick={handleClickEnter}
-      >
-        Enter
-      </button>
+      <WordInput disabled={phase !== Phase.CAN_GUESS} onEnter={handleEnter} />
       <div style={{"display": "flex"}}>
         <WordHistory guessesLeft={guessesLeft} wordHistory={wordHistory} />
         <WordHistory guessesLeft={opponentGuessesLeft} wordHistory={opponentWordHistory} />
