@@ -1,4 +1,4 @@
-import { Verdict } from "../common/verdict.mjs";
+import { Outcome, Verdict } from "../common/types.mjs";
 
 export default interface Player {
     playerIdx: number;
@@ -10,5 +10,5 @@ export default interface Player {
     notifyGuessesLeft(playerIdx: number, guessesLeft: number): void;
     notifyRound(currentRound: number, totalRounds: number): void;
     notifyRoundOutcome(scores: number[]): void;
-    notifyOverallOutcome(scores: number[]): void;
+    notifyOverallOutcome(outcome: Outcome, scores: number[]): void;
 }

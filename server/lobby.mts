@@ -1,15 +1,15 @@
-import { Verdict } from "../common/verdict.mjs";
+import { Outcome, Verdict } from "../common/types.mjs";
 import { State } from "./game.mjs";
 import Player from "./player.mjs";
 import Round from "./round.mjs";
 
-const PLAYERS_COUNT = 2;
+const PLAYERS_COUNT = 2; // must be 2
 const ROUNDS_COUNT = 2;
 
 export default class Lobby {
     private readonly players = [] as Player[];
     private readonly rounds = [] as Round[];
-    private readonly scores: number[] = Array(PLAYERS_COUNT).fill(0);
+    private readonly overallScores: number[] = Array(PLAYERS_COUNT).fill(0);
 
     constructor(
         private readonly maxGuesses: number,
@@ -66,10 +66,10 @@ export default class Lobby {
             }
             if (round.isFinished) {
                 const roundScores = round.scores;
-                roundScores.forEach((score, i) => this.scores[i] += score);
-                this.players.forEach((player) => player.notifyRoundOutcome(roundScores));
+                roundScores.forEach((score, i) => this.overallScores[i] += score);
+                this.notifyRoundOutcome(roundScores);
                 if (this.rounds.length >= ROUNDS_COUNT) {
-                    this.players.forEach((player) => player.notifyOverallOutcome(this.scores));
+                    this.notifyOverallOutcome();
                 } else {
                     this.startNewRound();
                 }
@@ -84,6 +84,28 @@ export default class Lobby {
             if (otherPlayer !== player) {
                 otherPlayer.notifyVerdicts(player.playerIdx, emptyWord, verdicts);
             }
+        });
+    }
+
+    private notifyRoundOutcome(roundScores: number[]) {
+        this.players.forEach((player) => {
+            const opponentPlayerIdx = 1 - player.playerIdx;
+            const playerScore = roundScores[player.playerIdx];
+            const opponentScore = roundScores[opponentPlayerIdx];
+            player.notifyRoundOutcome([playerScore, opponentScore]);
+        });
+    }
+
+    private notifyOverallOutcome() {
+        this.players.forEach((player) => {
+            const opponentPlayerIdx = 1 - player.playerIdx;
+            const playerScore = this.overallScores[player.playerIdx];
+            const opponentScore = this.overallScores[opponentPlayerIdx];
+            const outcome =
+                playerScore > opponentScore ? Outcome.WIN :
+                playerScore === opponentScore ? Outcome.TIE :
+                Outcome.LOSE;
+            player.notifyOverallOutcome(outcome, [playerScore, opponentScore]);
         });
     }
 

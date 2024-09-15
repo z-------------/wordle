@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
 import { createMessage, MessageKind } from "../common/message.mjs";
-import { Verdict } from "../common/verdict.mjs";
+import { Outcome, Verdict } from "../common/types.mjs";
 import Player from "./player.mjs";
 
 export default class SocketPlayer implements Player {
@@ -44,8 +44,8 @@ export default class SocketPlayer implements Player {
         this.socket.send(createMessage(MessageKind.ROUND_OUTCOME, data));
     }
 
-    notifyOverallOutcome(scores: number[]) {
-        const data = JSON.stringify(scores);
+    notifyOverallOutcome(outcome: Outcome, scores: number[]) {
+        const data = JSON.stringify([outcome, scores]);
         this.socket.send(createMessage(MessageKind.OVERALL_OUTCOME, data));
     }
 }

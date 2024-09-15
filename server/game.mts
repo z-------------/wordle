@@ -1,5 +1,5 @@
 import { WORD_LENGTH } from "../common/consts.mjs";
-import { Verdict } from "../common/verdict.mjs";
+import { Verdict } from "../common/types.mjs";
 import { isValidWord } from "./common.mjs";
 
 export enum State {

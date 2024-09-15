@@ -1,5 +1,5 @@
 import { WORD_LENGTH } from "../common/consts.mts";
-import { Verdict } from "../common/verdict.mts";
+import { Verdict } from "../common/types.mts";
 import Word from "./Word";
 
 export interface WordHistoryEntry {

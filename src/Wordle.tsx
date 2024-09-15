@@ -3,6 +3,7 @@ import { createMessage, MessageKind, parseMessage } from "../common/message.mts"
 import { socket } from "./socket";
 import WordHistory, { WordHistoryEntry } from "./WordHistory";
 import { Scoreboard } from "./Scoreboard";
+import { Outcome } from "../common/types.mts";
 
 enum Phase {
   BEFORE_START,
@@ -20,6 +21,7 @@ export default function Wordle() {
   const [roundInfo, setRoundInfo] = useState({ currentRound: 0, totalRounds: 0 });
   const [roundScores, setRoundScores] = useState([] as number[][]);
   const [overallScores, setOverallScores] = useState([] as number[]);
+  const [outcome, setOutcome] = useState(Outcome.UNDECIDED);
 
   useEffect(() => {
     function handleMessage(data: unknown) {
@@ -49,8 +51,13 @@ export default function Wordle() {
         const scores: number[] = JSON.parse(message.data);
         setRoundScores((prev) => prev.concat([scores]));
       } else if (message?.kind === MessageKind.OVERALL_OUTCOME) {
-        const scores: number[] = JSON.parse(message.data);
+        const [outcome, scores]: [Outcome, number[]] = JSON.parse(message.data);
         setOverallScores(scores);
+        setOutcome(outcome);
+        setGuessesLeft(0);
+        setWordHistory([]);
+        setOpponentWordHistory([]);
+        setOpponentGuessesLeft(0);
       }
     }
     socket.on("message", handleMessage);
@@ -79,7 +86,7 @@ export default function Wordle() {
       >
         Start
       </button>
-      <Scoreboard roundScores={roundScores} overallScores={overallScores} />
+      <Scoreboard roundScores={roundScores} overallScores={overallScores} outcome={outcome} />
       <p>Round {roundInfo.currentRound} of {roundInfo.totalRounds}</p>
       <input
         value={guessedWord}

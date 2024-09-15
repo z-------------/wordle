@@ -1,4 +1,4 @@
-import { Verdict } from "../common/verdict.mts";
+import { Verdict } from "../common/types.mts";
 import "./Letter.css";
 
 export default function Letter(props: { letter: string, verdict: Verdict }) {
