@@ -18,7 +18,7 @@ export default class Round {
 
     get scores(): number[] {
         if (this.isFinished) {
-            return this.games.map(game => game.guessesLeft + 1);
+            return this.games.map(game => game.state === State.LOSE ? 0 : game.guessesLeft + 1);
         }
         return this.games.map(() => 0);
     }
