@@ -2,6 +2,7 @@ import { Socket } from "socket.io";
 import { ServerMessage } from "../common/message.mjs";
 import { Outcome, Verdict } from "../common/types.mjs";
 import Player from "./player.mjs";
+import Lobby from "./lobby.mjs";
 
 function sendMessage(socket: Socket, message: ServerMessage) {
     socket.send(message);
@@ -9,8 +10,17 @@ function sendMessage(socket: Socket, message: ServerMessage) {
 
 export default class SocketPlayer implements Player {
     playerIdx = -1;
+    lobby: Lobby | undefined;
 
-    constructor(private readonly socket: Socket) {}
+    private socket: Socket;
+
+    constructor(socket: Socket) {
+        this.socket = socket;
+    }
+
+    setSocket(socket: Socket) {
+        this.socket = socket;
+    }
 
     notifyPlayerIdx(pidx: number) {
         this.playerIdx = pidx;
