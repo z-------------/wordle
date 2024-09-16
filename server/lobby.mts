@@ -56,9 +56,8 @@ export default class Lobby {
         this.players.forEach((player, playerIdx) => {
             const game = round.games[playerIdx];
             player.notifyRound(this.rounds.length, ROUNDS_COUNT);
-            player.notifyTurn();
             this.players.forEach((otherPlayer) => {
-                otherPlayer.notifyGuessesLeft(playerIdx, game.guessesLeft);
+                otherPlayer.notifyGuessesLeft(playerIdx, game.guessesLeft, true);
             });
         });
     }
@@ -75,11 +74,8 @@ export default class Lobby {
                 this.notifyVerdicts(player, guessedWord, verdicts);
             }
             this.players.forEach((otherPlayer) => {
-                otherPlayer.notifyGuessesLeft(player.playerIdx, game.guessesLeft);
+                otherPlayer.notifyGuessesLeft(player.playerIdx, game.guessesLeft, game.state === State.IN_PROGRESS);
             });
-            if (game.state === State.IN_PROGRESS) {
-                player.notifyTurn();
-            }
             if (round.isFinished) {
                 const roundScores = round.scores;
                 roundScores.forEach((score, i) => this.overallScores[i] += score);

@@ -42,17 +42,12 @@ export default class SocketPlayer implements Player {
         });
     }
 
-    notifyTurn() {
-        sendMessage(this.socket, {
-            kind: "TURN",
-        });
-    }
-
-    notifyGuessesLeft(pidx: number, guessesLeft: number) {
+    notifyGuessesLeft(pidx: number, guessesLeft: number, canGuess: boolean) {
         sendMessage(this.socket, {
             kind: "GUESSES_LEFT",
             isOwn: pidx === this.playerIdx,
             guessesLeft,
+            canGuess,
         });
     }
 

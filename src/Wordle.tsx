@@ -40,12 +40,16 @@ export default function Wordle() {
           word: guessedWord,
           verdicts,
         }));
-      } else if (message.kind === "TURN") {
-        setPhase(Phase.CAN_GUESS);
       } else if (message.kind === "GUESSES_LEFT") {
-        const { isOwn, guessesLeft } = message;
-        const setter = isOwn ? setGuessesLeft : setOpponentGuessesLeft;
-        setter(guessesLeft);
+        const { isOwn, guessesLeft, canGuess } = message;
+        if (isOwn) {
+          setGuessesLeft(guessesLeft);
+          if (canGuess) {
+            setPhase(Phase.CAN_GUESS);
+          }
+        } else {
+          setOpponentGuessesLeft(guessesLeft);
+        }
       } else if (message.kind === "ROUND") {
         const { currentRound, totalRounds } = message;
         setRoundInfo({ currentRound, totalRounds });

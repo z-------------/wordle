@@ -11,8 +11,6 @@ export interface ClientMessage {
 }
 
 export type ServerMessage = {
-    kind: "TURN",
-} | {
     kind: "INVALID_GUESS",
     reason: string,
 } | {
@@ -24,6 +22,7 @@ export type ServerMessage = {
     kind: "GUESSES_LEFT",
     isOwn: boolean,
     guessesLeft: number,
+    canGuess: boolean,
 } | {
     kind: "ROUND",
     currentRound: number,
