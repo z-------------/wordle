@@ -11,32 +11,55 @@ const opts = parseOpts();
 const wordList = await readWordList(opts.wordsList);
 
 const PORT = 8000;
+const MAX_DISCONNECTION_DURATION = 2 * 60 * 1000; // same as socket.io's default
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    connectionStateRecovery: {
+        maxDisconnectionDuration: MAX_DISCONNECTION_DURATION,
+    },
+});
 
-const players: { [id: string]: SocketPlayer } = {};
+const players: {
+    [id: string]: {
+        socketPlayer: SocketPlayer,
+        timeoutId?: NodeJS.Timeout,
+    }
+} = {};
 const wordleServer = new WordleServer(opts.maxGuesses, wordList);
 
 io.on("connection", (socket) => {
     console.log("client connected", socket.id, "recovered?", socket.recovered);
 
-    const player = new SocketPlayer(socket);
-    players[socket.id] = player;
-    wordleServer.addPlayer(player);
+    if (players[socket.id]) {
+        console.log("existing player reconnected");
+        players[socket.id].socketPlayer.setSocket(socket);
+        if (players[socket.id].timeoutId) {
+            clearTimeout(players[socket.id].timeoutId);
+        }
+    } else {
+        console.log("new player");
+        players[socket.id] = {
+            socketPlayer: new SocketPlayer(socket),
+        };
+    }
+    const player = players[socket.id];
 
     socket.on("disconnect", () => {
-        console.log("client disconnected");
-        wordleServer.removePlayer(player);
-        delete players[socket.id];
+        console.log("client disconnected", socket.id);
+        player.timeoutId = setTimeout(() => {
+            console.log("giving up on", socket.id);
+            wordleServer.removePlayer(player.socketPlayer);
+            delete players[socket.id];
+        }, MAX_DISCONNECTION_DURATION / 2);
     });
     socket.on("message", (data) => {
         const message = parseClientMessage(data);
         if (message) {
             if (message.kind === ClientMessageKind.HELLO) {
-                wordleServer.joinLobby(player);
+                wordleServer.joinLobby(player.socketPlayer);
             } else if (message.kind === ClientMessageKind.GUESS) {
-                wordleServer.guess(player, message.data);
+                wordleServer.guess(player.socketPlayer, message.data);
             } else {
                 console.warn("unexpected message kind", message.kind);
             }

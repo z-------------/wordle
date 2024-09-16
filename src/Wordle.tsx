@@ -23,6 +23,14 @@ export default function Wordle() {
   const [overallOutcome, setOverallOutcome] = useState({ outcome: Outcome.UNDECIDED, scores: [] as number[] });
 
   useEffect(() => {
+    function handleConnect() {
+      console.log("connected", socket.id, "recovered?", socket.recovered);
+    }
+
+    function handleDisconnect() {
+      console.log("disconnected");
+    }
+
     function handleMessage(message: ServerMessage) {
       console.log("handleMessage", message);
       if (message.kind === "VERDICTS") {
@@ -55,9 +63,13 @@ export default function Wordle() {
         setOpponentGuessesLeft(0);
       }
     }
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
     socket.on("message", handleMessage);
     return () => {
       socket.off("message", handleMessage);
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
     };
   }, []);
 

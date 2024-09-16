@@ -3,23 +3,17 @@ import Player from "./player.mjs";
 
 export default class WordleServer {
     private lobbies: Lobby[] = [];
-    private players: Player[] = [];
 
     constructor(
         private readonly maxGuesses: number,
         private readonly wordList: string[],
     ) {}
 
-    addPlayer(player: Player) {
-        this.players.push(player);
-    }
-
     removePlayer(player: Player) {
         if (player.lobby) {
             player.lobby.removePlayer(player);
             this.deleteLobby(player.lobby);
         }
-        this.players = this.players.filter((otherPlayer) => otherPlayer !== player);
     }
 
     joinLobby(player: Player) {
