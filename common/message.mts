@@ -2,6 +2,7 @@ import { Outcome, Verdict } from "./types.mjs";
 
 export enum ClientMessageKind {
     HELLO = "HELLO",
+    BYE = "BYE",
     GUESS = "GUESS",
 }
 

@@ -65,6 +65,8 @@ export default function Wordle() {
         setWordHistory([]);
         setOpponentWordHistory([]);
         setOpponentGuessesLeft(0);
+      } else if (message.kind === "LEAVE") {
+        setPhase(Phase.BEFORE_START);
       }
     }
     socket.on("connect", handleConnect);
@@ -81,6 +83,14 @@ export default function Wordle() {
     setPhase(Phase.WAITING);
     const message: ClientMessage = {
       kind: ClientMessageKind.HELLO,
+      data: "",
+    };
+    socket.send(message);
+  }
+
+  function handleClickQuit() {
+    const message: ClientMessage = {
+      kind: ClientMessageKind.BYE,
       data: "",
     };
     socket.send(message);
@@ -104,6 +114,12 @@ export default function Wordle() {
         onClick={handleClickStart}
       >
         Start
+      </button>
+      <button
+        disabled={phase === Phase.BEFORE_START}
+        onClick={handleClickQuit}
+      >
+        Quit
       </button>
       <Scoreboard roundScores={roundScores} overallOutcome={overallOutcome} />
       <p>Round {roundInfo.currentRound} of {roundInfo.totalRounds}</p>

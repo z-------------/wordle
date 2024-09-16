@@ -29,6 +29,7 @@ export default class Lobby {
         if (this.players.length < PLAYERS_COUNT) {
             const playerIdx = this.players.length;
             this.players.push(player);
+            player.lobby = this;
             player.notifyPlayerIdx(playerIdx);
             if (this.isFull) {
                 this.startNewRound();
@@ -36,16 +37,18 @@ export default class Lobby {
         }
     }
 
-    removePlayer(player: Player) {
-        this.players = this.players.filter((otherPlayer) => otherPlayer !== player);
-        this.players.forEach((otherPlayer) => {
-            otherPlayer.notifyLeave("Opponent left");
-        });
-    }
-
-    end() {
+    end(playerWhoLeft?: Player) {
         this.players.forEach((player) => {
-            player.notifyLeave("Lobby ended");
+            player.lobby = undefined;
+            if (playerWhoLeft) {
+                if (player === playerWhoLeft) {
+                    player.notifyLeave("You left");
+                } else {
+                    player.notifyLeave("Opponent left");
+                }
+            } else {
+                player.notifyLeave("Lobby ended");
+            }
         });
     }
 

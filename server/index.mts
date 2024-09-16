@@ -44,12 +44,13 @@ io.on("connection", (socket) => {
         };
     }
     const player = players[socket.id];
+    wordleServer.addPlayer(player.socketPlayer);
 
     socket.on("disconnect", () => {
         console.log("client disconnected", socket.id);
         player.timeoutId = setTimeout(() => {
             console.log("giving up on", socket.id);
-            wordleServer.removePlayer(player.socketPlayer);
+            wordleServer.leaveLobby(player.socketPlayer);
             delete players[socket.id];
         }, MAX_DISCONNECTION_DURATION / 2);
     });
@@ -58,6 +59,8 @@ io.on("connection", (socket) => {
         if (message) {
             if (message.kind === ClientMessageKind.HELLO) {
                 wordleServer.joinLobby(player.socketPlayer);
+            } else if (message.kind === ClientMessageKind.BYE) {
+                wordleServer.leaveLobby(player.socketPlayer);
             } else if (message.kind === ClientMessageKind.GUESS) {
                 wordleServer.guess(player.socketPlayer, message.data);
             } else {

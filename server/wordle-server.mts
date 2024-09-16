@@ -9,17 +9,22 @@ export default class WordleServer {
         private readonly wordList: string[],
     ) {}
 
-    removePlayer(player: Player) {
-        if (player.lobby) {
-            player.lobby.removePlayer(player);
-            this.deleteLobby(player.lobby);
+    addPlayer(player: Player) {
+        if (!player.lobby) {
+            player.notifyLeave("No current lobby");
         }
     }
 
     joinLobby(player: Player) {
         if (!player.lobby) {
-            const lobby = this.findOrCreateLobby(player);
-            player.lobby = lobby;
+            this.findOrCreateLobby(player);
+        }
+    }
+
+    leaveLobby(player: Player) {
+        if (player.lobby) {
+            this.deleteLobby(player.lobby);
+            player.lobby.end(player);
         }
     }
 
@@ -28,8 +33,8 @@ export default class WordleServer {
         if (player.lobby) {
             player.lobby.guess(player, guessedWord);
             if (player.lobby.isFinished) {
-                player.lobby.end();
                 this.deleteLobby(player.lobby);
+                player.lobby.end();
             }
         }
     }
@@ -52,7 +57,7 @@ export default class WordleServer {
         lobby.addPlayer(player);
         return lobby;
     }
-    
+
     private deleteLobby(lobby: Lobby) {
         this.lobbies = this.lobbies.filter((l) => l !== lobby);
         console.log("deleted a lobby,", this.lobbies.length, "remaining lobbies");
