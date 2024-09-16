@@ -1,41 +1,59 @@
-export enum MessageKind {
-    // client -> server
+import { Outcome, Verdict } from "./types.mjs";
+
+export enum ClientMessageKind {
     HELLO = "HELLO",
     GUESS = "GUESS",
-    // server -> client
-    TURN = "TURN",
-    INVALID_GUESS = "INVALID_GUESS",
-    VERDICTS = "VERDICTS",
-    GUESSES_LEFT = "GUESSES_LEFT",
-    ROUND = "ROUND",
-    ROUND_OUTCOME = "ROUND_OUTCOME",
-    OVERALL_OUTCOME = "OVERALL_OUTCOME",
-    LEAVE = "LEAVE",
 }
 
-export interface Message {
-    kind: MessageKind;
-    data: string;
+export interface ClientMessage {
+    kind: ClientMessageKind,
+    data: string,
 }
 
-export function createMessage(kind: MessageKind, data: string): Message {
-    return { kind, data };
+export type ServerMessage = {
+    kind: "TURN",
+} | {
+    kind: "INVALID_GUESS",
+    reason: string,
+} | {
+    kind: "VERDICTS",
+    isOwn: boolean,
+    guessedWord: string,
+    verdicts: Verdict[],
+} | {
+    kind: "GUESSES_LEFT",
+    isOwn: boolean,
+    guessesLeft: number,
+} | {
+    kind: "ROUND",
+    currentRound: number,
+    totalRounds: number,
+} | {
+    kind: "ROUND_OUTCOME",
+    scores: number[],
+} | {
+    kind: "OVERALL_OUTCOME",
+    outcome: Outcome,
+    scores: number[],
+} | {
+    kind: "LEAVE",
+    reason: string,
 }
 
-function isMessage(obj: unknown): obj is Message {
+function isClientMessage(obj: unknown): obj is ClientMessage {
     return !!obj
         && typeof obj === "object"
         && "kind" in obj
         && typeof obj.kind === "string"
-        && obj.kind in MessageKind
+        && obj.kind in ClientMessageKind
         && "data" in obj
         && typeof obj.data === "string";
 }
 
-export function parseMessage(obj: unknown): Message | undefined {
-    console.log("parseMessage", obj);
+export function parseClientMessage(obj: unknown): ClientMessage | undefined {
+    console.log("parseClientMessage", obj);
     try {
-        if (isMessage(obj)) {
+        if (isClientMessage(obj)) {
             return {
                 kind: obj.kind,
                 data: obj.data,

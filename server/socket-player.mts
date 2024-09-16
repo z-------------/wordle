@@ -1,7 +1,11 @@
 import { Socket } from "socket.io";
-import { createMessage, MessageKind } from "../common/message.mjs";
+import { ServerMessage } from "../common/message.mjs";
 import { Outcome, Verdict } from "../common/types.mjs";
 import Player from "./player.mjs";
+
+function sendMessage(socket: Socket, message: ServerMessage) {
+    socket.send(message);
+}
 
 export default class SocketPlayer implements Player {
     playerIdx = -1;
@@ -12,40 +16,63 @@ export default class SocketPlayer implements Player {
         this.playerIdx = pidx;
     }
 
-    notifyInvalidGuess(error: string) {
-        this.socket.send(createMessage(MessageKind.INVALID_GUESS, error));
+    notifyInvalidGuess(reason: string) {
+        sendMessage(this.socket, {
+            kind: "INVALID_GUESS",
+            reason,
+        });
     }
 
     notifyVerdicts(pidx: number, guessedWord: string, verdicts: Verdict[]) {
-        const data = JSON.stringify([pidx === this.playerIdx, guessedWord, verdicts]);
-        this.socket.send(createMessage(MessageKind.VERDICTS, data));
+        sendMessage(this.socket, {
+            kind: "VERDICTS",
+            isOwn: pidx === this.playerIdx,
+            guessedWord,
+            verdicts,
+        });
     }
 
     notifyTurn() {
-        this.socket.send(createMessage(MessageKind.TURN, ""));
+        sendMessage(this.socket, {
+            kind: "TURN",
+        });
     }
 
     notifyGuessesLeft(pidx: number, guessesLeft: number) {
-        const data = JSON.stringify([pidx === this.playerIdx, guessesLeft]);
-        this.socket.send(createMessage(MessageKind.GUESSES_LEFT, data));
+        sendMessage(this.socket, {
+            kind: "GUESSES_LEFT",
+            isOwn: pidx === this.playerIdx,
+            guessesLeft,
+        });
     }
 
     notifyRound(currentRound: number, totalRounds: number) {
-        const data = JSON.stringify([currentRound, totalRounds]);
-        this.socket.send(createMessage(MessageKind.ROUND, data));
+        sendMessage(this.socket, {
+            kind: "ROUND",
+            currentRound,
+            totalRounds,
+        });
     }
 
     notifyRoundOutcome(scores: number[]) {
-        const data = JSON.stringify(scores);
-        this.socket.send(createMessage(MessageKind.ROUND_OUTCOME, data));
+        sendMessage(this.socket, {
+            kind: "ROUND_OUTCOME",
+            scores,
+        });
     }
 
     notifyOverallOutcome(outcome: Outcome, scores: number[]) {
-        const data = JSON.stringify([outcome, scores]);
-        this.socket.send(createMessage(MessageKind.OVERALL_OUTCOME, data));
+        sendMessage(this.socket, {
+            kind: "OVERALL_OUTCOME",
+            outcome,
+            scores,
+        });
     }
 
     notifyLeave(reason: string): void {
-        this.socket.send(createMessage(MessageKind.LEAVE, reason));
+        sendMessage(this.socket, {
+            kind: "LEAVE",
+            reason,
+        });
     }
 }

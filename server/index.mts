@@ -1,7 +1,7 @@
 import express from "express";
 import * as http from "node:http";
 import { Server } from "socket.io";
-import { MessageKind, parseMessage } from "../common/message.mjs";
+import { ClientMessageKind, parseClientMessage } from "../common/message.mjs";
 import { readWordList } from "./common.mjs";
 import Lobby from "./lobby.mjs";
 import { parseOpts } from "./opts.mjs";
@@ -55,13 +55,13 @@ io.on("connection", (socket) => {
         }
     });
     socket.on("message", (data) => {
-        const message = parseMessage(data);
+        const message = parseClientMessage(data);
         if (message) {
-            if (message.kind === MessageKind.HELLO) {
+            if (message.kind === ClientMessageKind.HELLO) {
                 if (!lobby) {
                     lobby = findOrCreateLobby(player);
                 }
-            } else if (message.kind === MessageKind.GUESS && lobby) {
+            } else if (message.kind === ClientMessageKind.GUESS && lobby) {
                 const guessedWord = message.data;
                 console.log("received guess", guessedWord);
                 lobby.guess(player, guessedWord);
