@@ -1,4 +1,4 @@
-import { InvalidArgumentError, OptionValues, program } from "commander";
+import { InvalidArgumentError, ParseOptions, program } from "commander";
 
 function parsePositiveOption(s: string): number {
     const value = parseInt(s);
@@ -13,10 +13,11 @@ interface Opts {
     wordsList: string;
 }
 
-export function parseOpts(): Opts {
-    program
-        .option("--maxGuesses <n>", "maximum number of guesses", parsePositiveOption, 5)
-        .requiredOption("--wordsList <filename>", "filename containing the newline-delimited word list");
-    program.parse();
+program
+    .option("--maxGuesses <n>", "maximum number of guesses", parsePositiveOption, 5)
+    .requiredOption("--wordsList <filename>", "filename containing the newline-delimited word list");
+
+export function parseOpts(argv?: string[], parseOptions?: ParseOptions): Opts {
+    program.parse(argv, parseOptions);
     return program.opts();
 }
