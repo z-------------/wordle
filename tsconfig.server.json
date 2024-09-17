@@ -8,5 +8,6 @@
         "noImplicitAny": true,
         "useUnknownInCatchVariables": true,
     },
-    "include": ["server", "common"]
+    "include": ["server", "common"],
+    "exclude": ["server/*.test.*"],
 }
