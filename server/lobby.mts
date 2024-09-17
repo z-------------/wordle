@@ -4,7 +4,6 @@ import Player from "./player.mjs";
 import Round from "./round.mjs";
 
 const PLAYERS_COUNT = 2; // must be 2
-const ROUNDS_COUNT = 2;
 
 export default class Lobby {
     private _isFinished = false;
@@ -15,6 +14,7 @@ export default class Lobby {
     constructor(
         private readonly maxGuesses: number,
         private readonly wordList: string[],
+        private readonly roundsCount: number,
     ) {}
 
     get isFull(): boolean {
@@ -58,7 +58,7 @@ export default class Lobby {
 
         this.players.forEach((player, playerIdx) => {
             const game = round.games[playerIdx];
-            player.notifyRound(this.rounds.length, ROUNDS_COUNT);
+            player.notifyRound(this.rounds.length, this.roundsCount);
             this.players.forEach((otherPlayer) => {
                 otherPlayer.notifyGuessesLeft(playerIdx, game.guessesLeft, true);
             });
@@ -83,7 +83,7 @@ export default class Lobby {
                 const roundScores = round.scores;
                 roundScores.forEach((score, i) => this.overallScores[i] += score);
                 this.notifyRoundOutcome(roundScores);
-                if (this.rounds.length >= ROUNDS_COUNT) {
+                if (this.rounds.length >= this.roundsCount) {
                     this._isFinished = true;
                     this.notifyOverallOutcome();
                 } else {
