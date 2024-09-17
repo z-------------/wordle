@@ -1,10 +1,10 @@
+import { Socket } from "socket.io-client";
 import { Scoreboard } from "./Scoreboard";
-import { socket } from "./socket";
 import useWordle, { Phase } from "./useWordle";
 import WordHistory from "./WordHistory";
 import WordInput from "./WordInput";
 
-export default function Wordle() {
+export default function Wordle(props: { socket: Socket }) {
   const {
     sendHello,
     sendBye,
@@ -15,7 +15,7 @@ export default function Wordle() {
     wordHistory,
     opponentWordHistory,
     roundsInfo,
-  } = useWordle(socket);
+  } = useWordle(props.socket);
 
   function handleEnter(guessedWord: string) {
     if (guessedWord) {
