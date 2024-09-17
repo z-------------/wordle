@@ -10,19 +10,28 @@ export enum Phase {
   CAN_GUESS,
 }
 
+const initialRoundsInfo = {
+  currentRound: 0,
+  totalRounds: 0,
+  scores: [] as number[][],
+  overallOutcome: Outcome.UNDECIDED,
+  overallScores: [] as number[],
+};
+
 export default function useWordle(socket: Socket) {
   const [phase, setPhase] = useState(Phase.BEFORE_START);
   const [guessesLeft, setGuessesLeft] = useState(0);
   const [opponentGuessesLeft, setOpponentGuessesLeft] = useState(0);
   const [wordHistory, setWordHistory] = useState([] as WordHistoryEntry[]);
   const [opponentWordHistory, setOpponentWordHistory] = useState([] as WordHistoryEntry[]);
-  const [roundsInfo, setRoundsInfo] = useState({
-    currentRound: 0,
-    totalRounds: 0,
-    scores: [] as number[][],
-    overallOutcome: Outcome.UNDECIDED,
-    overallScores: [] as number[],
-  });
+  const [roundsInfo, setRoundsInfo] = useState(initialRoundsInfo);
+
+  function clearCurrentGameState() {
+    setGuessesLeft(0);
+    setWordHistory([]);
+    setOpponentGuessesLeft(0);
+    setOpponentWordHistory([]);
+  }
 
   useEffect(() => {
     function handleConnect() {
@@ -74,10 +83,7 @@ export default function useWordle(socket: Socket) {
           overallOutcome: outcome,
           overallScores: scores,
         }));
-        setGuessesLeft(0);
-        setWordHistory([]);
-        setOpponentWordHistory([]);
-        setOpponentGuessesLeft(0);
+        clearCurrentGameState();
       } else if (message.kind === "LEAVE") {
         setPhase(Phase.BEFORE_START);
       }
@@ -94,6 +100,8 @@ export default function useWordle(socket: Socket) {
 
   function sendHello() {
     setPhase(Phase.WAITING);
+    setRoundsInfo(initialRoundsInfo);
+    clearCurrentGameState();
     const message: ClientMessage = {
       kind: ClientMessageKind.HELLO,
       data: "",
