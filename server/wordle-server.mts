@@ -1,14 +1,13 @@
 import Lobby from "./lobby.mjs";
 import Player from "./player.mjs";
 
-const ROUNDS_COUNT = 2;
-
 export default class WordleServer {
     private lobbies: Lobby[] = [];
 
     constructor(
         private readonly maxGuesses: number,
         private readonly wordList: string[],
+        private readonly roundsCount: number,
     ) {}
 
     addPlayer(player: Player) {
@@ -52,7 +51,7 @@ export default class WordleServer {
             }
         }
         if (!lobby) {
-            lobby = new Lobby(this.maxGuesses, this.wordList, ROUNDS_COUNT);
+            lobby = new Lobby(this.maxGuesses, this.wordList, this.roundsCount);
             this.lobbies.push(lobby);
             console.log("created new lobby");
         }
