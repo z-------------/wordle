@@ -26,7 +26,7 @@ const players: {
         timeoutId?: NodeJS.Timeout,
     }
 } = {};
-const wordleServer = new WordleServer(opts.maxGuesses, wordList, 2);
+const wordleServer = new WordleServer(opts.maxGuesses, wordList, opts.roundsCount);
 
 io.on("connection", (socket) => {
     console.log("client connected", socket.id, "recovered?", socket.recovered);
