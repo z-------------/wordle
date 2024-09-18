@@ -1,3 +1,5 @@
+@import url("./verdict-colors.css");
+
 .letter {
     color: white;
     display: inline-block;
@@ -10,15 +12,15 @@
 }
 
 .letter-0 {
-    background-color: rgb(83, 141, 78);
+    background-color: var(--color-verdict-0);
 }
 
 .letter-1 {
-    background-color: rgb(181, 159, 59);
+    background-color: var(--color-verdict-1);
 }
 
 .letter-2 {
-    background-color: rgb(120, 124, 126);
+    background-color: var(--color-verdict-2);
 }
 
 .letter-3 {

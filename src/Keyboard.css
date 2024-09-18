@@ -1,3 +1,5 @@
+@import url("./verdict-colors.css");
+
 .keyboard-row {
   display: flex;
   justify-content: center;
@@ -5,4 +7,16 @@
 
 .keyboard-key {
   display: inline-block;
+}
+
+.keyboard-key-0 {
+  background-color: var(--color-verdict-0);
+}
+
+.keyboard-key-1 {
+  background-color: var(--color-verdict-1);
+}
+
+.keyboard-key-2 {
+  background-color: var(--color-verdict-2);
 }

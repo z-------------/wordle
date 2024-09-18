@@ -9,16 +9,9 @@ export interface WordHistoryEntry {
   verdicts: Verdict[];
 }
 
-export default function Board(props: {
-  allowInput?: boolean,
-  onEnter?: (guessedWord: string) => void,
-  guessesLeft: number,
-  wordHistory: WordHistoryEntry[],
-}) {
-  const [guessedWord, setGuessedWord] = useState("");
-
-  const words = [...props.wordHistory];
-  let emptyCount = props.guessesLeft;
+function calculateEffectiveWordHistory(guessesLeft: number, wordHistory: WordHistoryEntry[], guessedWord: string): WordHistoryEntry[] {
+  const words = [...wordHistory];
+  let emptyCount = guessesLeft;
   const emptyWord = Array<string>(WORD_LENGTH + 1).join(" ");
   const emptyVerdicts = Array<Verdict>(WORD_LENGTH).fill(Verdict.EMPTY);
   if (guessedWord) {
@@ -32,6 +25,32 @@ export default function Board(props: {
     word: emptyWord,
     verdicts: emptyVerdicts,
   }));
+  return words;
+}
+
+function calculateLetterVerdicts(wordHistory: WordHistoryEntry[]): Record<string, Verdict> {
+  const letterVerdicts: Record<string, Verdict> = {};
+  for (const { word, verdicts } of wordHistory) {
+    [...word].forEach((letter, i) => {
+      const verdict = verdicts[i];
+      const prevVerdict = letterVerdicts[letter];
+      if (typeof prevVerdict === "undefined" || verdict < prevVerdict) {
+        letterVerdicts[letter] = verdict;
+      }
+    });
+  }
+  return letterVerdicts;
+}
+
+export default function Board(props: {
+  allowInput?: boolean,
+  onEnter?: (guessedWord: string) => void,
+  guessesLeft: number,
+  wordHistory: WordHistoryEntry[],
+}) {
+  const [guessedWord, setGuessedWord] = useState("");
+  const effectiveWordHistory = calculateEffectiveWordHistory(props.guessesLeft, props.wordHistory, guessedWord);
+  const letterVerdicts = calculateLetterVerdicts(props.wordHistory);
 
   function handleEnter() {
     if (props.onEnter) {
@@ -51,7 +70,7 @@ export default function Board(props: {
   return (
     <>
       <div>
-        {words.map(({ word, verdicts }, i) => (
+        {effectiveWordHistory.map(({ word, verdicts }, i) => (
           <Word key={i} word={word} verdicts={verdicts} />
         ))}
       </div>
@@ -61,7 +80,7 @@ export default function Board(props: {
           onInput={handleInput}
           onEnter={handleEnter}
           onBackspace={handleBackspace}
-          letterVerdicts={{}}
+          letterVerdicts={letterVerdicts}
         />
       }
     </>

@@ -48,7 +48,13 @@ export default function Keyboard(props: {
             <button disabled={!props.allowEnter} className="keyboard-key" onClick={props.onEnter}>Enter</button>
           }
           {row.map((letter) => (
-            <button key={letter} disabled={!props.allowEnter} className="keyboard-key" data-letter={letter} onClick={handleClickLetter}>
+            <button
+              key={letter}
+              className={`keyboard-key keyboard-key-${props.letterVerdicts[letter] ?? Verdict.EMPTY}`}
+              disabled={!props.allowEnter}
+              data-letter={letter}
+              onClick={handleClickLetter}
+            >
               {letter}
             </button>
           ))}
