@@ -74,4 +74,11 @@ export default class SocketPlayer implements Player {
             reason,
         });
     }
+
+    notifyCost(cost: number): void {
+        sendMessage(this.socket, {
+            kind: "COST",
+            cost,
+        });
+    }
 }

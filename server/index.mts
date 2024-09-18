@@ -6,6 +6,7 @@ import { readWordList } from "./common.mjs";
 import { parseOpts } from "./opts.mjs";
 import SocketPlayer from "./socket-player.mjs";
 import WordleServer from "./wordle-server.mjs";
+import { Ability } from "../common/types.mjs";
 
 const opts = parseOpts();
 const wordList = await readWordList(opts.wordsList);
@@ -63,6 +64,13 @@ io.on("connection", (socket) => {
                 wordleServer.leaveLobby(player.socketPlayer);
             } else if (message.kind === ClientMessageKind.GUESS) {
                 wordleServer.guess(player.socketPlayer, message.data);
+            } else if (message.kind === ClientMessageKind.ABILITY) {
+                const abilityNum = Number(message.data);
+                if (!Number.isNaN(abilityNum) && abilityNum in Ability) {
+                    wordleServer.useAbility(player.socketPlayer, abilityNum);
+                } else {
+                    console.warn("invalid ability", message.data);
+                }
             } else {
                 console.warn("unexpected message kind", message.kind);
             }

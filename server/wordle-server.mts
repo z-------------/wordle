@@ -1,3 +1,4 @@
+import { Ability } from "../common/types.mjs";
 import Lobby from "./lobby.mjs";
 import Player from "./player.mjs";
 
@@ -37,6 +38,12 @@ export default class WordleServer {
                 this.deleteLobby(player.lobby);
                 player.lobby.end();
             }
+        }
+    }
+
+    useAbility(player: Player, ability: Ability) {
+        if (player.lobby) {
+            player.lobby.useAbility(player, ability);
         }
     }
 

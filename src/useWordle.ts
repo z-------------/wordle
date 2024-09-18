@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import { Outcome } from "../common/types.mts";
+import { Ability, Outcome } from "../common/types.mts";
 import { WordHistoryEntry } from "./WordHistory";
 import { ClientMessage, ClientMessageKind, Scores, ServerMessage } from "../common/message.mts";
 
@@ -97,6 +97,16 @@ export default function useWordle(socket: Socket) {
       } else if (message.kind === "INVALID_GUESS") {
         const { reason } = message;
         addActivity(reason);
+      } else if (message.kind === "COST") {
+        const { cost } = message;
+        addActivity(`Used ability for cost ${cost}`);
+        setRoundsInfo((prev) => ({
+          ...prev,
+          runningScores: {
+            ...prev.runningScores,
+            player: prev.runningScores.player - cost,
+          },
+        }));
       }
     }
     socket.on("connect", handleConnect);
@@ -138,10 +148,19 @@ export default function useWordle(socket: Socket) {
     socket.send(message);
   }
 
+  function sendAbility(ability: Ability) {
+    const message: ClientMessage = {
+      kind: ClientMessageKind.ABILITY,
+      data: ability.toString(),
+    };
+    socket.send(message);
+  }
+
   return {
     sendHello,
     sendBye,
     sendGuess,
+    sendAbility,
     phase,
     guessesLeft,
     opponentGuessesLeft,

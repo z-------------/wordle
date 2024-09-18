@@ -12,4 +12,5 @@ export default interface Player {
     notifyRound(currentRound: number, totalRounds: number): void;
     notifyRoundOutcome(roundScores: Scores, runningScores: Scores, outcome: Outcome): void;
     notifyLeave(reason: string): void;
+    notifyCost(cost: number): void;
 }

@@ -38,25 +38,22 @@ function judge(word: string, guessedWord: string): Verdict[] {
 
 export default class Game {
     private win = false;
-    private _guessesLeft: number;
+    private usedGuesses = 0;
+    private readonly originalMaxGuesses;
 
     constructor(
-        private readonly maxGuesses: number,
+        public maxGuesses: number,
         private readonly word: string,
         private readonly wordList: string[],
     ) {
-        this._guessesLeft = this.maxGuesses;
-    }
-
-    get guessesLeft(): number {
-        return this._guessesLeft;
+        this.originalMaxGuesses = maxGuesses;
     }
 
     get state(): State {
         if (this.win) {
             return State.WIN;
         }
-        if (this._guessesLeft <= 0) {
+        if (this.usedGuesses >= this.maxGuesses) {
             return State.LOSE;
         }
         return State.IN_PROGRESS;
@@ -66,13 +63,21 @@ export default class Game {
         return this.guessImpl(guessedWord.toUpperCase());
     }
 
+    get guessesLeft(): number {
+        return this.maxGuesses - this.usedGuesses;
+    }
+
+    get score(): number {
+        return this.state === State.LOSE ? 0 : this.originalMaxGuesses - this.usedGuesses + 1;
+    }
+
     private guessImpl(guessedWord: string): GuessResult {
         if (this.state !== State.IN_PROGRESS) {
             return { error: "Cannot guess: game is not in progress." };
         }
         if (isValidWord(guessedWord)) {
             if (this.wordList.includes(guessedWord)) {
-                --this._guessesLeft;
+                ++this.usedGuesses;
                 const verdicts = judge(this.word, guessedWord);
                 this.win = verdicts.every(v => v === Verdict.HIT);
                 return { verdicts };

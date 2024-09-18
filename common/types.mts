@@ -11,3 +11,7 @@ export enum Outcome {
     LOSE,
     UNDECIDED,
 }
+
+export enum Ability {
+    STEAL,
+}

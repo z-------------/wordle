@@ -4,6 +4,7 @@ export enum ClientMessageKind {
     HELLO = "HELLO",
     BYE = "BYE",
     GUESS = "GUESS",
+    ABILITY = "ABILITY",
 }
 
 export interface ClientMessage {
@@ -41,6 +42,9 @@ export type ServerMessage = {
 } | {
     kind: "LEAVE",
     reason: string,
+} | {
+    kind: "COST",
+    cost: number,
 }
 
 function isClientMessage(obj: unknown): obj is ClientMessage {
