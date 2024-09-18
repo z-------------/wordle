@@ -1,5 +1,5 @@
 import { Scores } from "../common/message.mjs";
-import { Outcome, Verdict } from "../common/types.mjs";
+import { Ability, Outcome, Verdict } from "../common/types.mjs";
 import Lobby from "./lobby.mjs";
 
 export default interface Player {
@@ -10,7 +10,7 @@ export default interface Player {
     notifyVerdicts(playerIdx: number, guessedWord: string, verdicts: Verdict[]): void;
     notifyGuessesLeft(playerIdx: number, guessesLeft: number, canGuess: boolean): void;
     notifyRound(currentRound: number, totalRounds: number): void;
-    notifyRoundOutcome(roundScores: Scores, runningScores: Scores, outcome: Outcome): void;
+    notifyScores(roundScores: Scores[], runningScores: Scores, outcome: Outcome): void;
     notifyLeave(reason: string): void;
-    notifyCost(cost: number): void;
+    notifyUsedAbility(playerIdx: number, ability: Ability, cost: number): void;
 }

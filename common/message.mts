@@ -1,4 +1,4 @@
-import { Outcome, Verdict } from "./types.mjs";
+import { Ability, Outcome, Verdict } from "./types.mjs";
 
 export enum ClientMessageKind {
     HELLO = "HELLO",
@@ -35,15 +35,17 @@ export type ServerMessage = {
     currentRound: number,
     totalRounds: number,
 } | {
-    kind: "ROUND_OUTCOME",
-    roundScores: Scores,
+    kind: "SCORES",
+    roundScores: Scores[],
     runningScores: Scores,
     outcome: Outcome,
 } | {
     kind: "LEAVE",
     reason: string,
 } | {
-    kind: "COST",
+    kind: "USED_ABILITY",
+    isOwn: boolean,
+    ability: Ability,
     cost: number,
 }
 

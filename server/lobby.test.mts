@@ -13,8 +13,9 @@ class TestPlayer implements Player {
   notifyVerdicts = vi.fn();
   notifyGuessesLeft = vi.fn();
   notifyRound = vi.fn();
-  notifyRoundOutcome = vi.fn();
+  notifyScores = vi.fn();
   notifyLeave = vi.fn();
+  notifyUsedAbility = vi.fn();
 }
 
 describe("Lobby class", () => {
@@ -89,16 +90,16 @@ describe("Lobby class", () => {
     expect(player2.notifyVerdicts).toHaveBeenCalled();
     expect(player1.notifyRound).toHaveBeenNthCalledWith(2, 2, 2);
     expect(player2.notifyRound).toHaveBeenNthCalledWith(2, 2, 2);
-    expect(player1.notifyRoundOutcome).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.UNDECIDED);
-    expect(player2.notifyRoundOutcome).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.UNDECIDED);
+    expect(player1.notifyScores).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.UNDECIDED);
+    expect(player2.notifyScores).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.UNDECIDED);
     expect(lobby.isFinished).toEqual(false);
 
     lobby.guess(player1, "HELLO");
     lobby.guess(player2, "HELLO");
-    expect(player1.notifyRoundOutcome).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.TIE);
-    expect(player2.notifyRoundOutcome).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.TIE);
-    expect(player1.notifyRoundOutcome).toHaveBeenCalledTimes(2);
-    expect(player2.notifyRoundOutcome).toHaveBeenCalledTimes(2);
+    expect(player1.notifyScores).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.TIE);
+    expect(player2.notifyScores).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.TIE);
+    expect(player1.notifyScores).toHaveBeenCalledTimes(2);
+    expect(player2.notifyScores).toHaveBeenCalledTimes(2);
     expect(lobby.isFinished).toEqual(true);
   });
 

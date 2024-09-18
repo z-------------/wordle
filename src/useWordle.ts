@@ -78,16 +78,16 @@ export default function useWordle(socket: Socket) {
         setWordHistory([]);
         setOpponentWordHistory([]);
         addActivity(`Round ${currentRound} of ${totalRounds} started`);
-      } else if (message.kind === "ROUND_OUTCOME") {
+      } else if (message.kind === "SCORES") {
         const { roundScores, runningScores, outcome } = message;
         setRoundsInfo((prev) => ({
           ...prev,
-          roundScores: prev.roundScores.concat(roundScores),
+          roundScores,
           runningScores,
           outcome,
         }));
-        addActivity("Round ended");
         if (outcome !== Outcome.UNDECIDED) {
+          addActivity("Round ended");
           clearCurrentGameState();
         }
       } else if (message.kind === "LEAVE") {
@@ -97,16 +97,9 @@ export default function useWordle(socket: Socket) {
       } else if (message.kind === "INVALID_GUESS") {
         const { reason } = message;
         addActivity(reason);
-      } else if (message.kind === "COST") {
-        const { cost } = message;
-        addActivity(`Used ability for cost ${cost}`);
-        setRoundsInfo((prev) => ({
-          ...prev,
-          runningScores: {
-            ...prev.runningScores,
-            player: prev.runningScores.player - cost,
-          },
-        }));
+      } else if (message.kind === "USED_ABILITY") {
+        const { isOwn, cost } = message;
+        addActivity(`${isOwn ? "You" : "Opponent"} used ability for cost ${cost}`);
       }
     }
     socket.on("connect", handleConnect);

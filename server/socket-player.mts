@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
 import { Scores, ServerMessage } from "../common/message.mjs";
-import { Outcome, Verdict } from "../common/types.mjs";
+import { Ability, Outcome, Verdict } from "../common/types.mjs";
 import Player from "./player.mjs";
 import Lobby from "./lobby.mjs";
 
@@ -59,9 +59,9 @@ export default class SocketPlayer implements Player {
         });
     }
 
-    notifyRoundOutcome(roundScores: Scores, runningScores: Scores, outcome: Outcome) {
+    notifyScores(roundScores: Scores[], runningScores: Scores, outcome: Outcome) {
         sendMessage(this.socket, {
-            kind: "ROUND_OUTCOME",
+            kind: "SCORES",
             roundScores,
             runningScores,
             outcome,
@@ -75,9 +75,11 @@ export default class SocketPlayer implements Player {
         });
     }
 
-    notifyCost(cost: number): void {
+    notifyUsedAbility(pidx: number, ability: Ability, cost: number) {
         sendMessage(this.socket, {
-            kind: "COST",
+            kind: "USED_ABILITY",
+            isOwn: pidx === this.playerIdx,
+            ability,
             cost,
         });
     }

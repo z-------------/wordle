@@ -14,7 +14,8 @@ export default class Lobby {
     private _isFinished = false;
     private players = [] as Player[];
     private readonly rounds = [] as Round[];
-    private readonly runningScores: number[] = Array(PLAYERS_COUNT).fill(0);
+    private readonly roundScores = [] as number[][];
+    private readonly runningScores = Array<number>(PLAYERS_COUNT).fill(0);
     private readonly abilityUseCounts: Record<Ability, number>[] = Array(PLAYERS_COUNT).fill(undefined).map(() => ({
         [Ability.STEAL]: 0,
     }));
@@ -85,9 +86,11 @@ export default class Lobby {
                     used = this.useAbilitySteal(player, round);
                 }
                 if (used) {
+                    this.afterMove(round);
                     this.runningScores[player.playerIdx] -= cost;
+                    this.roundScores[this.roundScores.length - 1][player.playerIdx] -= cost;
                     ++this.abilityUseCounts[player.playerIdx][ability];
-                    player.notifyCost(cost);
+                    this.notifyUsedAbility(player, ability, cost);
                 }
             }
         }
@@ -106,7 +109,6 @@ export default class Lobby {
         }
         ++playerGame.maxGuesses;
         --opponentGame.maxGuesses;
-        this.afterMove(round);
         return true;
     }
 
@@ -119,14 +121,17 @@ export default class Lobby {
             });
         });
         if (round.isFinished) {
-            // update running scores
+            // update scores
             const roundScores = round.scores;
-            roundScores.forEach((score, i) => this.runningScores[i] += score);
+            roundScores.forEach((score, i) => {
+                this.roundScores[this.roundScores.length - 1][i] += score;
+                this.runningScores[i] += score;
+            });
 
             if (this.rounds.length >= this.roundsCount) {
                 this._isFinished = true;
             }
-            this.notifyRoundOutcome(roundScores);
+            this.notifyRoundOutcome();
             if (!this._isFinished) {
                 this.startNewRound();
             }
@@ -136,6 +141,7 @@ export default class Lobby {
     private startNewRound() {
         const round = new Round(this.maxGuesses, PLAYERS_COUNT, this.wordList);
         this.rounds.push(round);
+        this.roundScores.push(Array<number>(PLAYERS_COUNT).fill(0));
 
         this.players.forEach((player, playerIdx) => {
             const game = round.games[playerIdx];
@@ -156,7 +162,7 @@ export default class Lobby {
         });
     }
 
-    private notifyRoundOutcome(roundScores: number[]) {
+    private notifyRoundOutcome() {
         this.players.forEach((player) => {
             const opponentPlayerIdx = 1 - player.playerIdx;
             const playerRunningScore = this.runningScores[player.playerIdx];
@@ -166,11 +172,11 @@ export default class Lobby {
                 playerRunningScore > opponentRunningScore ? Outcome.WIN :
                 playerRunningScore === opponentRunningScore ? Outcome.TIE :
                 Outcome.LOSE;
-            player.notifyRoundOutcome(
-                {
+            player.notifyScores(
+                this.roundScores.map((roundScores) => ({
                     player: roundScores[player.playerIdx],
                     opponent: roundScores[opponentPlayerIdx],
-                },
+                })),
                 {
                     player: playerRunningScore,
                     opponent: opponentRunningScore,
@@ -178,6 +184,13 @@ export default class Lobby {
                 outcome,
             );
         });
+    }
+
+    private notifyUsedAbility(player: Player, ability: Ability, cost: number) {
+        this.players.forEach((otherPlayer) => {
+            otherPlayer.notifyUsedAbility(player.playerIdx, ability, cost);
+        });
+        this.notifyRoundOutcome();
     }
 
     private get currentRound(): Round | undefined {
