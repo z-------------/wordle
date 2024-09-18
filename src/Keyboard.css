@@ -1,0 +1,8 @@
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+}
+
+.keyboard-key {
+  display: inline-block;
+}

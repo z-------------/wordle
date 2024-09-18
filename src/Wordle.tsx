@@ -1,10 +1,9 @@
 import { Socket } from "socket.io-client";
+import { Ability } from "../common/types.mts";
+import ActivityLog from "./ActivityLog";
+import Board from "./Board";
 import { Scoreboard } from "./Scoreboard";
 import useWordle, { Phase } from "./useWordle";
-import WordHistory from "./WordHistory";
-import WordInput from "./WordInput";
-import ActivityLog from "./ActivityLog";
-import { Ability } from "../common/types.mts";
 
 export default function Wordle(props: { socket: Socket }) {
   const {
@@ -41,10 +40,9 @@ export default function Wordle(props: { socket: Socket }) {
       <button onClick={() => sendAbility(Ability.STEAL)}>
         Use steal
       </button>
-      <WordInput disabled={phase !== Phase.CAN_GUESS} onEnter={handleEnter} />
       <div style={{"display": "flex"}}>
-        <WordHistory guessesLeft={guessesLeft} wordHistory={wordHistory} />
-        <WordHistory guessesLeft={opponentGuessesLeft} wordHistory={opponentWordHistory} />
+        <Board onEnter={handleEnter} allowInput={phase === Phase.CAN_GUESS} guessesLeft={guessesLeft} wordHistory={wordHistory} />
+        <Board guessesLeft={opponentGuessesLeft} wordHistory={opponentWordHistory} />
       </div>
     </>
   );
