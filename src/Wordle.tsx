@@ -3,6 +3,7 @@ import { Scoreboard } from "./Scoreboard";
 import useWordle, { Phase } from "./useWordle";
 import WordHistory from "./WordHistory";
 import WordInput from "./WordInput";
+import ActivityLog from "./ActivityLog";
 
 export default function Wordle(props: { socket: Socket }) {
   const {
@@ -15,6 +16,7 @@ export default function Wordle(props: { socket: Socket }) {
     wordHistory,
     opponentWordHistory,
     roundsInfo,
+    activityLog,
   } = useWordle(props.socket);
 
   function handleEnter(guessedWord: string) {
@@ -37,6 +39,7 @@ export default function Wordle(props: { socket: Socket }) {
       >
         Quit
       </button>
+      <ActivityLog activityLog={activityLog} />
       <Scoreboard roundScores={roundsInfo.scores} overallOutcome={roundsInfo.overallOutcome} overallScores={roundsInfo.overallScores} />
       <p>Round {roundsInfo.currentRound} of {roundsInfo.totalRounds}</p>
       <WordInput disabled={phase !== Phase.CAN_GUESS} onEnter={handleEnter} />

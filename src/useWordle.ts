@@ -25,6 +25,7 @@ export default function useWordle(socket: Socket) {
   const [wordHistory, setWordHistory] = useState([] as WordHistoryEntry[]);
   const [opponentWordHistory, setOpponentWordHistory] = useState([] as WordHistoryEntry[]);
   const [roundsInfo, setRoundsInfo] = useState(initialRoundsInfo);
+  const [activityLog, setActivityLog] = useState([] as string[]);
 
   function clearCurrentGameState() {
     setGuessesLeft(0);
@@ -33,13 +34,19 @@ export default function useWordle(socket: Socket) {
     setOpponentWordHistory([]);
   }
 
+  function addActivity(activity: string) {
+    setActivityLog((prev) => [activity].concat(prev));
+  }
+
   useEffect(() => {
     function handleConnect() {
       console.log("connected", socket.id, "recovered?", socket.recovered);
+      addActivity("Connected");
     }
 
     function handleDisconnect() {
       console.log("disconnected");
+      addActivity("Disconnected");
     }
 
     function handleMessage(message: ServerMessage) {
@@ -70,12 +77,14 @@ export default function useWordle(socket: Socket) {
         }));
         setWordHistory([]);
         setOpponentWordHistory([]);
+        addActivity(`Round ${currentRound} of ${totalRounds} started`);
       } else if (message.kind === "ROUND_OUTCOME") {
         const { scores } = message;
         setRoundsInfo((prev) => ({
           ...prev,
           scores: prev.scores.concat([scores]),
         }));
+        addActivity("Round ended");
       } else if (message.kind === "OVERALL_OUTCOME") {
         const { outcome, scores } = message;
         setRoundsInfo((prev) => ({
@@ -85,7 +94,12 @@ export default function useWordle(socket: Socket) {
         }));
         clearCurrentGameState();
       } else if (message.kind === "LEAVE") {
+        const { reason } = message;
         setPhase(Phase.BEFORE_START);
+        addActivity(reason);
+      } else if (message.kind === "INVALID_GUESS") {
+        const { reason } = message;
+        addActivity(reason);
       }
     }
     socket.on("connect", handleConnect);
@@ -101,6 +115,7 @@ export default function useWordle(socket: Socket) {
   function sendHello() {
     setPhase(Phase.WAITING);
     setRoundsInfo(initialRoundsInfo);
+    addActivity("Waiting for lobby");
     clearCurrentGameState();
     const message: ClientMessage = {
       kind: ClientMessageKind.HELLO,
@@ -136,5 +151,6 @@ export default function useWordle(socket: Socket) {
     wordHistory,
     opponentWordHistory,
     roundsInfo,
+    activityLog,
   };
 }

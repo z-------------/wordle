@@ -1,0 +1,6 @@
+.activity-log {
+  max-height: 5em;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column-reverse;
+}
