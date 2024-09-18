@@ -9,7 +9,7 @@ export default class Lobby {
     private _isFinished = false;
     private players = [] as Player[];
     private readonly rounds = [] as Round[];
-    private readonly overallScores: number[] = Array(PLAYERS_COUNT).fill(0);
+    private readonly runningScores: number[] = Array(PLAYERS_COUNT).fill(0);
 
     constructor(
         private readonly maxGuesses: number,
@@ -81,12 +81,12 @@ export default class Lobby {
             });
             if (round.isFinished) {
                 const roundScores = round.scores;
-                roundScores.forEach((score, i) => this.overallScores[i] += score);
-                this.notifyRoundOutcome(roundScores);
+                roundScores.forEach((score, i) => this.runningScores[i] += score);
                 if (this.rounds.length >= this.roundsCount) {
                     this._isFinished = true;
-                    this.notifyOverallOutcome();
-                } else {
+                }
+                this.notifyRoundOutcome(roundScores);
+                if (!this._isFinished) {
                     this.startNewRound();
                 }
             }
@@ -106,22 +106,24 @@ export default class Lobby {
     private notifyRoundOutcome(roundScores: number[]) {
         this.players.forEach((player) => {
             const opponentPlayerIdx = 1 - player.playerIdx;
-            const playerScore = roundScores[player.playerIdx];
-            const opponentScore = roundScores[opponentPlayerIdx];
-            player.notifyRoundOutcome([playerScore, opponentScore]);
-        });
-    }
-
-    private notifyOverallOutcome() {
-        this.players.forEach((player) => {
-            const opponentPlayerIdx = 1 - player.playerIdx;
-            const playerScore = this.overallScores[player.playerIdx];
-            const opponentScore = this.overallScores[opponentPlayerIdx];
+            const playerRunningScore = this.runningScores[player.playerIdx];
+            const opponentRunningScore = this.runningScores[opponentPlayerIdx];
             const outcome =
-                playerScore > opponentScore ? Outcome.WIN :
-                playerScore === opponentScore ? Outcome.TIE :
+                !this._isFinished ? Outcome.UNDECIDED :
+                playerRunningScore > opponentRunningScore ? Outcome.WIN :
+                playerRunningScore === opponentRunningScore ? Outcome.TIE :
                 Outcome.LOSE;
-            player.notifyOverallOutcome(outcome, [playerScore, opponentScore]);
+            player.notifyRoundOutcome(
+                {
+                    player: roundScores[player.playerIdx],
+                    opponent: roundScores[opponentPlayerIdx],
+                },
+                {
+                    player: playerRunningScore,
+                    opponent: opponentRunningScore,
+                },
+                outcome,
+            )
         });
     }
 

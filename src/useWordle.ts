@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import { Outcome } from "../common/types.mts";
 import { WordHistoryEntry } from "./WordHistory";
-import { ClientMessage, ClientMessageKind, ServerMessage } from "../common/message.mts";
+import { ClientMessage, ClientMessageKind, Scores, ServerMessage } from "../common/message.mts";
 
 export enum Phase {
   BEFORE_START,
@@ -13,9 +13,9 @@ export enum Phase {
 const initialRoundsInfo = {
   currentRound: 0,
   totalRounds: 0,
-  scores: [] as number[][],
-  overallOutcome: Outcome.UNDECIDED,
-  overallScores: [] as number[],
+  roundScores: [] as Scores[],
+  outcome: Outcome.UNDECIDED,
+  runningScores: { player: 0, opponent: 0 } as Scores,
 };
 
 export default function useWordle(socket: Socket) {
@@ -79,20 +79,17 @@ export default function useWordle(socket: Socket) {
         setOpponentWordHistory([]);
         addActivity(`Round ${currentRound} of ${totalRounds} started`);
       } else if (message.kind === "ROUND_OUTCOME") {
-        const { scores } = message;
+        const { roundScores, runningScores, outcome } = message;
         setRoundsInfo((prev) => ({
           ...prev,
-          scores: prev.scores.concat([scores]),
+          roundScores: prev.roundScores.concat(roundScores),
+          runningScores,
+          outcome,
         }));
         addActivity("Round ended");
-      } else if (message.kind === "OVERALL_OUTCOME") {
-        const { outcome, scores } = message;
-        setRoundsInfo((prev) => ({
-          ...prev,
-          overallOutcome: outcome,
-          overallScores: scores,
-        }));
-        clearCurrentGameState();
+        if (outcome !== Outcome.UNDECIDED) {
+          clearCurrentGameState();
+        }
       } else if (message.kind === "LEAVE") {
         const { reason } = message;
         setPhase(Phase.BEFORE_START);

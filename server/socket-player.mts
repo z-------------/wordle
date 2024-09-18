@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import { ServerMessage } from "../common/message.mjs";
+import { Scores, ServerMessage } from "../common/message.mjs";
 import { Outcome, Verdict } from "../common/types.mjs";
 import Player from "./player.mjs";
 import Lobby from "./lobby.mjs";
@@ -59,18 +59,12 @@ export default class SocketPlayer implements Player {
         });
     }
 
-    notifyRoundOutcome(scores: number[]) {
+    notifyRoundOutcome(roundScores: Scores, runningScores: Scores, outcome: Outcome) {
         sendMessage(this.socket, {
             kind: "ROUND_OUTCOME",
-            scores,
-        });
-    }
-
-    notifyOverallOutcome(outcome: Outcome, scores: number[]) {
-        sendMessage(this.socket, {
-            kind: "OVERALL_OUTCOME",
+            roundScores,
+            runningScores,
             outcome,
-            scores,
         });
     }
 

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import Lobby from "./lobby.mjs";
 import Player from "./player.mts";
+import { Outcome } from "../common/types.mts";
 
 class TestPlayer implements Player {
   playerIdx: number;
@@ -13,7 +14,6 @@ class TestPlayer implements Player {
   notifyGuessesLeft = vi.fn();
   notifyRound = vi.fn();
   notifyRoundOutcome = vi.fn();
-  notifyOverallOutcome = vi.fn();
   notifyLeave = vi.fn();
 }
 
@@ -89,15 +89,17 @@ describe("Lobby class", () => {
     expect(player2.notifyVerdicts).toHaveBeenCalled();
     expect(player1.notifyRound).toHaveBeenNthCalledWith(2, 2, 2);
     expect(player2.notifyRound).toHaveBeenNthCalledWith(2, 2, 2);
-    expect(player1.notifyRoundOutcome).toHaveBeenCalledTimes(1);
-    expect(player2.notifyRoundOutcome).toHaveBeenCalledTimes(1);
+    expect(player1.notifyRoundOutcome).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.UNDECIDED);
+    expect(player2.notifyRoundOutcome).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.UNDECIDED);
+    expect(lobby.isFinished).toEqual(false);
 
     lobby.guess(player1, "HELLO");
     lobby.guess(player2, "HELLO");
+    expect(player1.notifyRoundOutcome).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.TIE);
+    expect(player2.notifyRoundOutcome).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.TIE);
     expect(player1.notifyRoundOutcome).toHaveBeenCalledTimes(2);
     expect(player2.notifyRoundOutcome).toHaveBeenCalledTimes(2);
-    expect(player1.notifyOverallOutcome).toHaveBeenCalledOnce();
-    expect(player2.notifyOverallOutcome).toHaveBeenCalledOnce();
+    expect(lobby.isFinished).toEqual(true);
   });
 
   it("rejects guesses from invalid player", () => {

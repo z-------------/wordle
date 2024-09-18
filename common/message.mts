@@ -11,6 +11,11 @@ export interface ClientMessage {
     data: string,
 }
 
+export interface Scores {
+    player: number,
+    opponent: number,
+}
+
 export type ServerMessage = {
     kind: "INVALID_GUESS",
     reason: string,
@@ -30,11 +35,9 @@ export type ServerMessage = {
     totalRounds: number,
 } | {
     kind: "ROUND_OUTCOME",
-    scores: number[],
-} | {
-    kind: "OVERALL_OUTCOME",
+    roundScores: Scores,
+    runningScores: Scores,
     outcome: Outcome,
-    scores: number[],
 } | {
     kind: "LEAVE",
     reason: string,

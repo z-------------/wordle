@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import WordleServer from "./wordle-server.mjs";
 import Player from "./player.mts";
 import Lobby from "./lobby.mts";
+import { Outcome } from "../common/types.mts";
 
 class TestPlayer implements Player {
   playerIdx: number;
@@ -14,7 +15,6 @@ class TestPlayer implements Player {
   notifyGuessesLeft = vi.fn();
   notifyRound = vi.fn();
   notifyRoundOutcome = vi.fn();
-  notifyOverallOutcome = vi.fn();
   notifyLeave = vi.fn();
 }
 
@@ -71,8 +71,8 @@ describe("WordleServer class", () => {
     wordleServer.guess(player2, "HELLO");
 
     expect(wordleServer["lobbies"]).toHaveLength(0);
-    expect(player1.notifyOverallOutcome).toHaveBeenCalledOnce();
-    expect(player2.notifyOverallOutcome).toHaveBeenCalledOnce();
+    expect(player1.notifyRoundOutcome).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.TIE);
+    expect(player2.notifyRoundOutcome).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.TIE);
     expect(player1.notifyLeave).toHaveBeenCalledOnce();
     expect(player2.notifyLeave).toHaveBeenCalledOnce();
   });

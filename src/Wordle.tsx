@@ -40,7 +40,7 @@ export default function Wordle(props: { socket: Socket }) {
         Quit
       </button>
       <ActivityLog activityLog={activityLog} />
-      <Scoreboard roundScores={roundsInfo.scores} overallOutcome={roundsInfo.overallOutcome} overallScores={roundsInfo.overallScores} />
+      <Scoreboard roundScores={roundsInfo.roundScores} outcome={roundsInfo.outcome} runningScores={roundsInfo.runningScores} />
       <p>Round {roundsInfo.currentRound} of {roundsInfo.totalRounds}</p>
       <WordInput disabled={phase !== Phase.CAN_GUESS} onEnter={handleEnter} />
       <div style={{"display": "flex"}}>
