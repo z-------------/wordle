@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { WORD_LENGTH } from "../common/consts.mts";
-import { Verdict } from "../common/types.mts";
+import { WORD_LENGTH } from "../../common/consts.mts";
+import { Verdict } from "../../common/types.mts";
 import Keyboard from "./Keyboard";
 import Word from "./Word";
 

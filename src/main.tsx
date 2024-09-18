@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import Wordle from "./Wordle";
+import Wordle from "./components/Wordle";
 import { socket } from "./socket";
 
 createRoot(document.getElementById("root")!).render(

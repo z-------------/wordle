@@ -1,5 +1,5 @@
-import { Scores } from "../common/message.mts";
-import { Outcome } from "../common/types.mts";
+import { Scores } from "../../common/message.mts";
+import { Outcome } from "../../common/types.mts";
 
 export function Scoreboard(props: {
   roundScores: Scores[],

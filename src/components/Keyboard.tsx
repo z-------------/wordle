@@ -1,5 +1,5 @@
 import { MouseEvent, useEffect } from "react";
-import { Verdict } from "../common/types.mts";
+import { Verdict } from "../../common/types.mts";
 import "./Keyboard.css";
 
 const rows = [

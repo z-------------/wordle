@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { Verdict } from "../common/types.mts";
+import { Verdict } from "../../common/types.mts";
 import Word from "./Word";
 
 describe("Word component", () => {

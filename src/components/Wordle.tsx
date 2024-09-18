@@ -1,9 +1,9 @@
 import { Socket } from "socket.io-client";
-import { Ability } from "../common/types.mts";
+import { Ability } from "../../common/types.mts";
 import ActivityLog from "./ActivityLog";
 import Board from "./Board";
 import { Scoreboard } from "./Scoreboard";
-import useWordle, { Phase } from "./useWordle";
+import useWordle, { Phase } from "../useWordle";
 
 export default function Wordle(props: { socket: Socket }) {
   const {

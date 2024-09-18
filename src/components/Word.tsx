@@ -1,4 +1,4 @@
-import { Verdict } from "../common/types.mts";
+import { Verdict } from "../../common/types.mts";
 import Letter from "./Letter";
 import "./Word.css";
 
