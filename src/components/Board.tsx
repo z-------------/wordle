@@ -21,10 +21,12 @@ function calculateEffectiveWordHistory(guessesLeft: number, wordHistory: WordHis
     });
     --emptyCount;
   }
-  words.push(...Array<WordHistoryEntry>(emptyCount).fill({
-    word: emptyWord,
-    verdicts: emptyVerdicts,
-  }));
+  if (emptyCount > 0) {
+    words.push(...Array<WordHistoryEntry>(emptyCount).fill({
+      word: emptyWord,
+      verdicts: emptyVerdicts,
+    }));
+  }
   return words;
 }
 
