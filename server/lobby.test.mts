@@ -194,4 +194,30 @@ describe("Lobby class", () => {
     expect(player1.notifyUsedAbility).toHaveBeenCalledTimes(2);
     expect(player2.notifyUsedAbility).toHaveBeenCalledTimes(2);
   });
+
+  it("ends the lobby when a player is out of guesses after a steal", () => {
+    const player1 = new TestPlayer();
+    const player2 = new TestPlayer();
+    const lobby = new Lobby(2, ["RIGHT", "WRONG"], 2, "RIGHT");
+    lobby.addPlayer(player1);
+    lobby.addPlayer(player2);
+
+    // finish one round so that both players have some score
+    lobby.guess(player1, "RIGHT");
+    lobby.guess(player2, "RIGHT");
+    expect(player1.notifyScores).toHaveBeenLastCalledWith(expect.any(Array), { player: 2, opponent: 2 }, Outcome.UNDECIDED, "RIGHT");
+    expect(player1.notifyRound).toHaveBeenLastCalledWith(2, 2);
+    expect(player2.notifyRound).toHaveBeenLastCalledWith(2, 2);
+
+    // player 1 uses steal
+    lobby.guess(player1, "RIGHT");
+    lobby.guess(player2, "WRONG");
+    lobby.useAbility(player1, Ability.STEAL);
+    expect(player1.notifyUsedAbility).toHaveBeenCalledTimes(1);
+    expect(player2.notifyUsedAbility).toHaveBeenCalledTimes(1);
+    expect(player1.notifyLeave).toHaveBeenCalledWith("Lobby ended");
+    expect(player2.notifyLeave).toHaveBeenCalledWith("Lobby ended");
+    expect(player1.notifyScores).toHaveBeenCalledWith(expect.any(Array), expect.any(Object), Outcome.WIN, "RIGHT");
+    expect(player2.notifyScores).toHaveBeenCalledWith(expect.any(Array), expect.any(Object), Outcome.LOSE, "RIGHT");
+  });
 });

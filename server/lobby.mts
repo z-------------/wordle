@@ -215,6 +215,9 @@ export default class Lobby {
                 word,
             );
         });
+        if (this.isFinished) {
+            this.end();
+        }
     }
 
     private notifyUsedAbility(player: Player, ability: Ability, cost: number) {

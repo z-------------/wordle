@@ -35,18 +35,22 @@ export default class WordleServer {
 
     guess(player: Player, guessedWord: string) {
         console.log("received guess", guessedWord);
-        if (player.lobby) {
-            player.lobby.guess(player, guessedWord);
-            if (player.lobby.isFinished) {
-                this.deleteLobby(player.lobby);
-                player.lobby.end();
+        const lobby = player.lobby;
+        if (lobby) {
+            lobby.guess(player, guessedWord);
+            if (lobby.isFinished) {
+                this.deleteLobby(lobby);
             }
         }
     }
 
     useAbility(player: Player, ability: Ability) {
-        if (player.lobby) {
-            player.lobby.useAbility(player, ability);
+        const lobby = player.lobby;
+        if (lobby) {
+            lobby.useAbility(player, ability);
+            if (lobby.isFinished) {
+                this.deleteLobby(lobby);
+            }
         }
     }
 
