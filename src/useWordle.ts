@@ -18,6 +18,10 @@ const initialRoundsInfo = {
   runningScores: { player: 0, opponent: 0 } as Scores,
 };
 
+const initialAbilityUseCount = {
+  [Ability.STEAL]: 0,
+};
+
 export default function useWordle(socket: Socket) {
   const [phase, setPhase] = useState(Phase.BEFORE_START);
   const [guessesLeft, setGuessesLeft] = useState(0);
@@ -26,6 +30,11 @@ export default function useWordle(socket: Socket) {
   const [opponentWordHistory, setOpponentWordHistory] = useState([] as WordHistoryEntry[]);
   const [roundsInfo, setRoundsInfo] = useState(initialRoundsInfo);
   const [activityLog, setActivityLog] = useState([] as string[]);
+  const [abilityUseCount, setAbilityUseCount] = useState(initialAbilityUseCount);
+
+  const canUseAbility = {
+    [Ability.STEAL]: phase !== Phase.BEFORE_START && abilityUseCount[Ability.STEAL] < 1 && roundsInfo.runningScores.player >= 1,
+  };
 
   function clearCurrentGameState() {
     setGuessesLeft(0);
@@ -89,19 +98,23 @@ export default function useWordle(socket: Socket) {
         if (word) {
           addActivity(`The answer is "${word}"`);
         }
-        if (outcome !== Outcome.UNDECIDED) {
-          clearCurrentGameState();
-        }
       } else if (message.kind === "LEAVE") {
         const { reason } = message;
         setPhase(Phase.BEFORE_START);
+        setAbilityUseCount(initialAbilityUseCount);
         addActivity(reason);
       } else if (message.kind === "INVALID_GUESS") {
         const { reason } = message;
         addActivity(reason);
       } else if (message.kind === "USED_ABILITY") {
-        const { isOwn, cost } = message;
+        const { isOwn, ability, cost } = message;
         addActivity(`${isOwn ? "You" : "Opponent"} used ability for cost ${cost}`);
+        if (isOwn) {
+          setAbilityUseCount((prev) => ({
+            ...prev,
+            [ability]: (prev[ability] ?? 0) + 1,
+          }));
+        }
       }
     }
     socket.on("connect", handleConnect);
@@ -163,5 +176,6 @@ export default function useWordle(socket: Socket) {
     opponentWordHistory,
     roundsInfo,
     activityLog,
+    canUseAbility,
   };
 }

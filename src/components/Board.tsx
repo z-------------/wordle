@@ -70,7 +70,7 @@ export default function Board(props: {
   }
 
   return (
-    <>
+    <div>
       <div>
         {effectiveWordHistory.map(({ word, verdicts }, i) => (
           <Word key={i} word={word} verdicts={verdicts} />
@@ -85,6 +85,6 @@ export default function Board(props: {
           letterVerdicts={letterVerdicts}
         />
       }
-    </>
+    </div>
   );
 }
