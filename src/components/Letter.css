@@ -1,99 +1,101 @@
 @import url("../verdict-colors.css");
 
 .letter {
-    display: inline-block;
-    margin-right: 0.1em;
-    width: 1em;
-    height: 1.2em;
-    text-align: center;
-    vertical-align: middle;
-    border: solid 1px transparent;
-    position: relative;
-    line-height: 1.1em;
+  display: inline-block;
+  margin-right: 0.1em;
+  width: 1em;
+  height: 1.2em;
+  text-align: center;
+  vertical-align: middle;
+  border: solid 1px transparent;
+  position: relative;
+  line-height: 1.1em;
 
-    background-color: transparent;
-    border-color: rgb(211, 214, 218);
-    color: black;
+  background-color: transparent;
+  border-color: rgb(211, 214, 218);
+  color: black;
 }
 
 .letter-0::after {
-    background-color: var(--color-verdict-0);
+  background-color: var(--color-verdict-0);
 }
 
 .letter-1::after {
-    background-color: var(--color-verdict-1);
+  background-color: var(--color-verdict-1);
 }
 
 .letter-2::after {
-    background-color: var(--color-verdict-2);
+  background-color: var(--color-verdict-2);
 }
 
 .letter:not(.letter-3)::after {
-    color: white;
+  color: white;
 }
 
-.letter::before, .letter::after {
-    content: attr(data-letter);
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    backface-visibility: hidden;
-    animation-fill-mode: forwards;
+.letter::before,
+.letter::after {
+  content: attr(data-letter);
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  backface-visibility: hidden;
+  animation-fill-mode: forwards;
 }
 
 .letter::before {
-    transform: perspective(100px) rotateY(0);
+  transform: perspective(100px) rotateY(0);
 }
 
 .letter::after {
-    transform: perspective(100px) rotateY(-180deg);
+  transform: perspective(100px) rotateY(-180deg);
 }
 
-.letter:not(.letter-3)::before, .letter:not(.letter-3)::after {
-    animation-duration: 300ms;
-    animation-delay: calc(150ms * var(--letter-index));
+.letter:not(.letter-3)::before,
+.letter:not(.letter-3)::after {
+  animation-duration: 300ms;
+  animation-delay: calc(150ms * var(--letter-index));
 }
 
 .letter:not(.letter-3)::before {
-    animation-name: letter-revealed-front;
+  animation-name: letter-revealed-front;
 }
 
 .letter:not(.letter-3)::after {
-    animation-name: letter-revealed-back;
+  animation-name: letter-revealed-back;
 }
 
 .letter-3.letter-present {
-    animation-name: letter-typed;
-    animation-duration: 100ms;
+  animation-name: letter-typed;
+  animation-duration: 100ms;
 }
 
 @keyframes letter-typed {
-    from {
-        transform: scale(0.8);
-    }
+  from {
+    transform: scale(0.8);
+  }
 
-    to {
-        transform: scale(1);
-    }
+  to {
+    transform: scale(1);
+  }
 }
 
 @keyframes letter-revealed-front {
-    from {
-        transform: perspective(100px) rotateY(0);
-    }
+  from {
+    transform: perspective(100px) rotateY(0);
+  }
 
-    to {
-        transform: perspective(100px) rotateY(180deg);
-    }
+  to {
+    transform: perspective(100px) rotateY(180deg);
+  }
 }
 
 @keyframes letter-revealed-back {
-    from {
-        transform: perspective(100px) rotateY(-180deg);
-    }
+  from {
+    transform: perspective(100px) rotateY(-180deg);
+  }
 
-    to {
-        transform: perspective(100px) rotateY(0);
-    }
+  to {
+    transform: perspective(100px) rotateY(0);
+  }
 }

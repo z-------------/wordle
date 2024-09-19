@@ -6,11 +6,11 @@ import { WORD_LENGTH } from "../common/consts.mjs";
  * @returns A randomly selected choice
  */
 export function sample<T>(choices: T[]): T {
-    return choices[Math.floor(Math.random() * choices.length)];
+  return choices[Math.floor(Math.random() * choices.length)];
 }
 
 function isAllLetters(s: string): boolean {
-    return /^[A-Za-z]*$/.test(s);
+  return /^[A-Za-z]*$/.test(s);
 }
 
 /**
@@ -18,5 +18,5 @@ function isAllLetters(s: string): boolean {
  * @returns Whether the word is a valid word: has correct length and consists entirely of English letters
  */
 export function isValidWord(word: string): boolean {
-    return word.length === WORD_LENGTH && isAllLetters(word);
+  return word.length === WORD_LENGTH && isAllLetters(word);
 }
