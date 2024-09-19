@@ -46,6 +46,7 @@ export default class Game {
         private readonly word: string,
         private readonly wordList: string[],
     ) {
+        // keep track of the original value, because maxGuesses can be changed
         this.originalMaxGuesses = maxGuesses;
     }
 

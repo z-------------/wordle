@@ -18,10 +18,16 @@ export default class Round {
         console.log("new round", { word: this._word });
     }
 
+    /**
+     * Check whether every game in this round is finished.
+     */
     get isFinished(): boolean {
         return this.games.every(game => game.state !== State.IN_PROGRESS);
     }
 
+    /**
+     * Calculate scores for each player in this round.
+     */
     get scores(): number[] {
         if (this.isFinished) {
             return this.games.map(game => game.score);

@@ -8,6 +8,9 @@ function sendMessage(socket: Socket, message: ServerMessage) {
     socket.send(message);
 }
 
+/**
+ * Implements communication with socket
+ */
 export default class SocketPlayer implements Player {
     playerIdx = -1;
     lobby: Lobby | undefined;

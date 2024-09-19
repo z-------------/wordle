@@ -60,6 +60,10 @@ function isClientMessage(obj: unknown): obj is ClientMessage {
         && typeof obj.data === "string";
 }
 
+/**
+ * @param obj The received client message
+ * @returns The processed client message if valid, undefined otherwise
+ */
 export function parseClientMessage(obj: unknown): ClientMessage | undefined {
     console.log("parseClientMessage", obj);
     try {

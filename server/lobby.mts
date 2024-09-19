@@ -43,6 +43,9 @@ export default class Lobby {
         return this._isFinished;
     }
 
+    /**
+     * Add a player to the lobby. Starts a round if both players are present.
+     */
     addPlayer(player: Player) {
         if (this.players.length < PLAYERS_COUNT) {
             const playerIdx = this.players.length;
@@ -55,6 +58,10 @@ export default class Lobby {
         }
     }
 
+    /**
+     * End the lobby.
+     * @param playerWhoLeft The player whose leaving triggered the lobby ending, if any
+     */
     end(playerWhoLeft?: Player) {
         this.players.forEach((player) => {
             player.lobby = undefined;
@@ -70,6 +77,9 @@ export default class Lobby {
         });
     }
 
+    /**
+     * Make a guess and broadcast the results, advancing to the next round if needed
+     */
     guess(player: Player, guessedWord: string) {
         const round = this.currentRound;
         if (isValidPlayer(player) && round) {
@@ -84,6 +94,9 @@ export default class Lobby {
         }
     }
 
+    /**
+     * Use an ability and broadcast the results
+     */
     useAbility(player: Player, ability: Ability) {
         const round = this.currentRound;
         if (isValidPlayer(player) && round) {
@@ -95,8 +108,11 @@ export default class Lobby {
                     used = this.useAbilitySteal(player, round);
                 }
                 if (used) {
+                    // broadcast new guesses left, etc.
                     this.afterMove(round);
+                    // subtract cost
                     this.roundScores[this.roundScores.length - 1][player.playerIdx] -= cost;
+                    // update use count
                     ++this.abilityUseCounts[player.playerIdx][ability];
                     this.notifyUsedAbility(player, ability, cost);
                 }
@@ -146,10 +162,12 @@ export default class Lobby {
     }
 
     private startNewRound() {
+        // create new round
         const round = new Round(this.maxGuesses, PLAYERS_COUNT, this.wordList, this.word);
         this.rounds.push(round);
         this.roundScores.push(Array<number>(PLAYERS_COUNT).fill(0));
 
+        // notify players of new round after short delay
         const delay = this.rounds.length <= 1 || this.isTest ? 0 : 1000;
         this.players.forEach((player, playerIdx) => {
             const game = round.games[playerIdx];
@@ -163,6 +181,7 @@ export default class Lobby {
     }
 
     private notifyVerdicts(player: Player, guessedWord: string, verdicts: Verdict[]) {
+        // broadcast verdicts to both players, censoring the word for the opponent
         player.notifyVerdicts(player.playerIdx, guessedWord, verdicts);
         const emptyWord = Array(guessedWord.length + 1).join(" ");
         this.players.forEach((otherPlayer) => {
@@ -206,6 +225,7 @@ export default class Lobby {
     }
 
     private get currentRound(): Round | undefined {
+        // get the current non-finished round, if any
         if (this.rounds.length > 0) {
             const round = this.rounds[this.rounds.length - 1];
             if (!round.isFinished) {
@@ -216,6 +236,7 @@ export default class Lobby {
     }
 
     private get runningScores(): number[] {
+        // calculate running scores from round scores
         return this.roundScores.reduce((a, b) => a.map((_, i) => a[i] + b[i]));
     }
 }

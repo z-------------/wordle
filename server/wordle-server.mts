@@ -2,6 +2,9 @@ import { Ability } from "../common/types.mjs";
 import Lobby from "./lobby.mjs";
 import Player from "./player.mjs";
 
+/**
+ * Manages lobbies, assigning players to lobbies, and proxying game commands to the correct lobby.
+ */
 export default class WordleServer {
     private lobbies: Lobby[] = [];
 

@@ -9,6 +9,7 @@ import { parseOpts } from "./opts.mjs";
 import SocketPlayer from "./socket-player.mjs";
 import WordleServer from "./wordle-server.mjs";
 
+// read words line by line from filename
 async function readWordList(filename: string): Promise<string[]> {
     try {
         const wordList = [];
@@ -43,6 +44,7 @@ const io = new Server(server, {
     },
 });
 
+// mapping from socket id to player info
 const players: {
     [id: string]: {
         socketPlayer: SocketPlayer,
@@ -55,8 +57,10 @@ io.on("connection", (socket) => {
     console.log("client connected", socket.id, "recovered?", socket.recovered);
 
     if (players[socket.id]) {
+        // recovered connection of existing player; replace player object's socket
         console.log("existing player reconnected");
         players[socket.id].socketPlayer.setSocket(socket);
+        // cancel timeout
         if (players[socket.id].timeoutId) {
             clearTimeout(players[socket.id].timeoutId);
         }
@@ -71,6 +75,8 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
         console.log("client disconnected", socket.id);
+        // start a timeout after which the player is treated as having quit
+        // socket.io discards connection states older than MAX_DISCONNECTION_DURATION, so our timeout must be less than that
         player.timeoutId = setTimeout(() => {
             console.log("giving up on", socket.id);
             wordleServer.leaveLobby(player.socketPlayer);
@@ -78,6 +84,7 @@ io.on("connection", (socket) => {
         }, MAX_DISCONNECTION_DURATION / 2);
     });
     socket.on("message", (data) => {
+        // proxy valid messages to the wordle server
         const message = parseClientMessage(data);
         if (message) {
             if (message.kind === ClientMessageKind.HELLO) {
