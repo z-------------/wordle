@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import Lobby from "./lobby.mjs";
 import Player from "./player.mts";
-import { Outcome } from "../common/types.mts";
+import { Ability, Outcome } from "../common/types.mts";
 
 class TestPlayer implements Player {
   playerIdx: number;
@@ -141,5 +141,57 @@ describe("Lobby class", () => {
     lobby.guess(player1, "HELLO");
     expect(player1.notifyVerdicts).toHaveBeenCalledTimes(2);
     expect(player2.notifyVerdicts).toHaveBeenCalledTimes(2);
+  });
+
+  it("lets players use abilities when valid", () => {
+    const player1 = new TestPlayer();
+    const player2 = new TestPlayer();
+    const lobby = new Lobby(2, ["RIGHT", "WRONG"], 3, "RIGHT");
+    lobby.addPlayer(player1);
+    lobby.addPlayer(player2);
+
+    // expect cannot use abilities due to no score
+    lobby.useAbility(player1, Ability.STEAL);
+    expect(player1.notifyUsedAbility).not.toHaveBeenCalled();
+    lobby.useAbility(player2, Ability.STEAL);
+    expect(player2.notifyUsedAbility).not.toHaveBeenCalled();
+
+    // finish one round so that both players have some score
+    lobby.guess(player1, "RIGHT");
+    lobby.guess(player2, "WRONG");
+    lobby.guess(player2, "RIGHT");
+    expect(player1.notifyScores).toHaveBeenLastCalledWith(expect.any(Array), { player: 2, opponent: 1 }, Outcome.UNDECIDED, "RIGHT");
+    expect(player1.notifyRound).toHaveBeenLastCalledWith(2, 3);
+    expect(player2.notifyRound).toHaveBeenLastCalledWith(2, 3);
+
+    // expect player 2 can use ability
+    lobby.useAbility(player2, Ability.STEAL);
+    expect(player1.notifyUsedAbility).toHaveBeenCalledTimes(1);
+    expect(player1.notifyUsedAbility).toHaveBeenLastCalledWith(1, Ability.STEAL, 1);
+    expect(player2.notifyUsedAbility).toHaveBeenCalledTimes(1);
+
+    // expect player 1 cannot use ability if player 2 has no guesses left
+    lobby.guess(player2, "WRONG");
+    lobby.guess(player2, "WRONG");
+    lobby.guess(player2, "WRONG");
+    lobby.useAbility(player1, Ability.STEAL);
+    expect(player1.notifyUsedAbility).toHaveBeenCalledTimes(1);
+    expect(player2.notifyUsedAbility).toHaveBeenCalledTimes(1);
+
+    // go to next round
+    lobby.guess(player1, "RIGHT");
+    expect(player1.notifyRound).toHaveBeenLastCalledWith(3, 3);
+    expect(player1.notifyScores).toHaveBeenLastCalledWith(expect.any(Array), { player: 4, opponent: 0 }, Outcome.UNDECIDED, "RIGHT");
+
+    // expect player 1 can use ability
+    lobby.useAbility(player1, Ability.STEAL);
+    expect(player1.notifyUsedAbility).toHaveBeenCalledTimes(2);
+    expect(player2.notifyUsedAbility).toHaveBeenCalledTimes(2);
+    expect(player1.notifyScores).toHaveBeenLastCalledWith(expect.any(Array), { player: 3, opponent: 0 }, Outcome.UNDECIDED, undefined);
+
+    // expect player 1 cannot use same ability again
+    lobby.useAbility(player1, Ability.STEAL);
+    expect(player1.notifyUsedAbility).toHaveBeenCalledTimes(2);
+    expect(player2.notifyUsedAbility).toHaveBeenCalledTimes(2);
   });
 });

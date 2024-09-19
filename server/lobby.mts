@@ -89,7 +89,7 @@ export default class Lobby {
         if (isValidPlayer(player) && round) {
             const runningScore = this.runningScores[player.playerIdx];
             const cost = ABILITY_COSTS[ability];
-            if (runningScore > cost) {
+            if (runningScore >= cost) {
                 let used = false;
                 if (ability === Ability.STEAL) {
                     used = this.useAbilitySteal(player, round);
@@ -150,9 +150,9 @@ export default class Lobby {
         this.rounds.push(round);
         this.roundScores.push(Array<number>(PLAYERS_COUNT).fill(0));
 
+        const delay = this.rounds.length <= 1 || this.isTest ? 0 : 1000;
         this.players.forEach((player, playerIdx) => {
             const game = round.games[playerIdx];
-            const delay = this.rounds.length <= 1 || this.isTest ? 0 : 1000;
             afterDelay(() => {
                 player.notifyRound(this.rounds.length, this.roundsCount);
                 this.players.forEach((otherPlayer) => {
