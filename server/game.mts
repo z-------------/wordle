@@ -69,7 +69,9 @@ export default class Game {
   }
 
   get score(): number {
-    return this.state === State.LOSE ? 0 : this.originalMaxGuesses - this.usedGuesses + 1;
+    // lose -> 0
+    // win -> at least 1
+    return this.state === State.LOSE ? 0 : Math.max(1, this.originalMaxGuesses - this.usedGuesses + 1);
   }
 
   private guessImpl(guessedWord: string): GuessResult {
