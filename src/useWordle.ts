@@ -32,9 +32,12 @@ export default function useWordle(socket: Socket) {
   const [activityLog, setActivityLog] = useState([] as string[]);
   const [abilityUseCount, setAbilityUseCount] = useState(initialAbilityUseCount);
 
-  const canUseAbility = {
-    [Ability.STEAL]: phase !== Phase.BEFORE_START && abilityUseCount[Ability.STEAL] < 1 && roundsInfo.runningScores.player >= 1,
-  };
+  function canUseAbility(ability: Ability) {
+    return phase !== Phase.BEFORE_START
+      && abilityUseCount[ability] < 1
+      && roundsInfo.runningScores.player >= 1
+      && opponentGuessesLeft > 0;
+  }
 
   function clearCurrentGameState() {
     setGuessesLeft(0);
@@ -176,6 +179,8 @@ export default function useWordle(socket: Socket) {
     opponentWordHistory,
     roundsInfo,
     activityLog,
-    canUseAbility,
+    canUseAbility: {
+      [Ability.STEAL]: canUseAbility(Ability.STEAL),
+    },
   };
 }

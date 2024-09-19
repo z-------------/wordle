@@ -4,7 +4,7 @@ import { Ability } from "../../common/types.mts";
 import useWordle, { Phase } from "../useWordle";
 import ActivityLog from "./ActivityLog";
 import Board from "./Board";
-import { Scoreboard } from "./Scoreboard";
+import Scoreboard from "./Scoreboard";
 import WelcomeMessage from "./WelcomeMessage";
 import "./Wordle.css";
 import AbilityButton from "./AbilityButton";

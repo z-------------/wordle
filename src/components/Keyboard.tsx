@@ -59,7 +59,7 @@ export default function Keyboard(props: {
             </button>
           ))}
           {i === rows.length - 1 &&
-            <button disabled={!props.allowEnter} className="keyboard-key" onClick={props.onBackspace}>⌫</button>
+            <button disabled={!props.allowEnter} className="keyboard-key" data-testid="keyboard-backspace" onClick={props.onBackspace}>⌫</button>
           }
         </div>
       ))}

@@ -1,7 +1,7 @@
 import { Scores } from "../../common/message.mts";
 import { Outcome } from "../../common/types.mts";
 
-export function Scoreboard(props: {
+export default function Scoreboard(props: {
   roundScores: Scores[],
   runningScores: Scores,
   outcome: Outcome,
