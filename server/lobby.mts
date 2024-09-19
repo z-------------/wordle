@@ -15,7 +15,6 @@ export default class Lobby {
     private players = [] as Player[];
     private readonly rounds = [] as Round[];
     private readonly roundScores = [] as number[][];
-    private readonly runningScores = Array<number>(PLAYERS_COUNT).fill(0);
     private readonly abilityUseCounts: Record<Ability, number>[] = Array(PLAYERS_COUNT).fill(undefined).map(() => ({
         [Ability.STEAL]: 0,
     }));
@@ -24,6 +23,7 @@ export default class Lobby {
         private readonly maxGuesses: number,
         private readonly wordList: string[],
         private readonly roundsCount: number,
+        private readonly word?: string, // for unit tests
     ) {}
 
     get isFull(): boolean {
@@ -87,7 +87,6 @@ export default class Lobby {
                 }
                 if (used) {
                     this.afterMove(round);
-                    this.runningScores[player.playerIdx] -= cost;
                     this.roundScores[this.roundScores.length - 1][player.playerIdx] -= cost;
                     ++this.abilityUseCounts[player.playerIdx][ability];
                     this.notifyUsedAbility(player, ability, cost);
@@ -125,7 +124,6 @@ export default class Lobby {
             const roundScores = round.scores;
             roundScores.forEach((score, i) => {
                 this.roundScores[this.roundScores.length - 1][i] += score;
-                this.runningScores[i] += score;
             });
 
             if (this.rounds.length >= this.roundsCount) {
@@ -139,7 +137,7 @@ export default class Lobby {
     }
 
     private startNewRound() {
-        const round = new Round(this.maxGuesses, PLAYERS_COUNT, this.wordList);
+        const round = new Round(this.maxGuesses, PLAYERS_COUNT, this.wordList, this.word);
         this.rounds.push(round);
         this.roundScores.push(Array<number>(PLAYERS_COUNT).fill(0));
 
@@ -165,8 +163,9 @@ export default class Lobby {
     private notifyRoundOutcome() {
         this.players.forEach((player) => {
             const opponentPlayerIdx = 1 - player.playerIdx;
-            const playerRunningScore = this.runningScores[player.playerIdx];
-            const opponentRunningScore = this.runningScores[opponentPlayerIdx];
+            const runningScores = this.runningScores;
+            const playerRunningScore = runningScores[player.playerIdx];
+            const opponentRunningScore = runningScores[opponentPlayerIdx];
             const outcome =
                 !this._isFinished ? Outcome.UNDECIDED :
                 playerRunningScore > opponentRunningScore ? Outcome.WIN :
@@ -201,5 +200,9 @@ export default class Lobby {
             }
         }
         return undefined;
+    }
+
+    private get runningScores(): number[] {
+        return this.roundScores.reduce((a, b) => a.map((_, i) => a[i] + b[i]));
     }
 }

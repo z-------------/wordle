@@ -74,7 +74,7 @@ describe("Lobby class", () => {
   it("accepts guesses and reports lobby state", () => {
     const player1 = new TestPlayer();
     const player2 = new TestPlayer();
-    const lobby = new Lobby(2, ["HELLO"], 2);
+    const lobby = new Lobby(2, ["HELLO", "WORLD"], 2, "HELLO");
     lobby.addPlayer(player1);
     lobby.addPlayer(player2);
     expect(player1.notifyRound).toHaveBeenNthCalledWith(1, 1, 2);
@@ -84,20 +84,31 @@ describe("Lobby class", () => {
     expect(player1.notifyInvalidGuess).toHaveBeenNthCalledWith(1, expect.any(String));
     expect(player2.notifyInvalidGuess).not.toHaveBeenCalled();
 
+    lobby.guess(player1, "WORLD");
     lobby.guess(player1, "HELLO");
     lobby.guess(player2, "HELLO");
     expect(player1.notifyVerdicts).toHaveBeenCalled();
     expect(player2.notifyVerdicts).toHaveBeenCalled();
     expect(player1.notifyRound).toHaveBeenNthCalledWith(2, 2, 2);
     expect(player2.notifyRound).toHaveBeenNthCalledWith(2, 2, 2);
-    expect(player1.notifyScores).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.UNDECIDED);
-    expect(player2.notifyScores).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.UNDECIDED);
+    expect(player1.notifyScores).toHaveBeenLastCalledWith([
+      { player: 1, opponent: 2 },
+    ], { player: 1, opponent: 2 }, Outcome.UNDECIDED);
+    expect(player2.notifyScores).toHaveBeenLastCalledWith([
+      { player: 2, opponent: 1 },
+    ], { player: 2, opponent: 1 }, Outcome.UNDECIDED);
     expect(lobby.isFinished).toEqual(false);
 
     lobby.guess(player1, "HELLO");
     lobby.guess(player2, "HELLO");
-    expect(player1.notifyScores).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.TIE);
-    expect(player2.notifyScores).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.TIE);
+    expect(player1.notifyScores).toHaveBeenLastCalledWith([
+      { player: 1, opponent: 2 },
+      { player: 2, opponent: 2 },
+    ], { player: 3, opponent: 4 }, Outcome.LOSE);
+    expect(player2.notifyScores).toHaveBeenLastCalledWith([
+      { player: 2, opponent: 1 },
+      { player: 2, opponent: 2 },
+    ], { player: 4, opponent: 3 }, Outcome.WIN);
     expect(player1.notifyScores).toHaveBeenCalledTimes(2);
     expect(player2.notifyScores).toHaveBeenCalledTimes(2);
     expect(lobby.isFinished).toEqual(true);
