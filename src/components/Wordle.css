@@ -1,0 +1,14 @@
+.wordle {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.wordle-lobby-controls, .wordle-status, .wordle-ability-controls {
+  display: flex;
+  justify-content: center;
+
+  > * {
+    margin: 0 0.2em;
+  }
+}

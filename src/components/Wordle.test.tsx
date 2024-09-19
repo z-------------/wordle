@@ -40,7 +40,7 @@ describe("Wordle component", () => {
   it("requests to start game when Start is clicked", async () => {
     render(<Wordle socket={socket} />);
     await waitFor(async () => {
-      screen.getByText("Start").click();
+      screen.getByText("Join lobby").click();
       const message = await waitForMessage(serverSocket);
       expect(message).toEqual({
         kind: "HELLO",
