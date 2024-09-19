@@ -1,12 +1,34 @@
 import express from "express";
+import * as fs from "node:fs/promises";
 import * as http from "node:http";
 import { Server } from "socket.io";
 import { ClientMessageKind, parseClientMessage } from "../common/message.mjs";
-import { readWordList } from "./common.mjs";
+import { Ability } from "../common/types.mjs";
+import { isValidWord } from "./common.mjs";
 import { parseOpts } from "./opts.mjs";
 import SocketPlayer from "./socket-player.mjs";
 import WordleServer from "./wordle-server.mjs";
-import { Ability } from "../common/types.mjs";
+
+async function readWordList(filename: string): Promise<string[]> {
+    try {
+        const wordList = [];
+        const file = await fs.open(filename);
+        for await (const line of file.readLines()) {
+            const word = line.trim();
+            if (isValidWord(word)) {
+                wordList.push(word.toUpperCase());
+            } else {
+                console.warn(`Ignoring invalid word in word list: "${word}"`);
+            }
+        }
+        if (wordList.length === 0) {
+            throw new Error("Word list is empty");
+        }
+        return wordList;
+    } catch (e) {
+        throw new Error(`Failed to read words list: ${e}`);
+    }
+}
 
 const opts = parseOpts();
 const wordList = await readWordList(opts.wordsList);
