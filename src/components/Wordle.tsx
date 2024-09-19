@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { Socket } from "socket.io-client";
-import { Ability } from "../../common/types.mts";
-import useWordle, { Phase } from "../useWordle";
+import { Ability, Outcome } from "../../common/types.mts";
+import useWordle, { Phase } from "../hooks/useWordle";
+import AbilityButton from "./AbilityButton";
 import ActivityLog from "./ActivityLog";
 import Board from "./Board";
 import Scoreboard from "./Scoreboard";
 import WelcomeMessage from "./WelcomeMessage";
 import "./Wordle.css";
-import AbilityButton from "./AbilityButton";
+import useLocalStorage from "../hooks/useLocalStorage";
 
 export default function Wordle(props: { socket: Socket }) {
   const [isFirstPlay, setIsFirstPlay] = useState(true);
+  const [highScore, setHighScore] = useLocalStorage("wordleHighScore");
   const {
     sendHello,
     sendBye,
@@ -25,6 +27,10 @@ export default function Wordle(props: { socket: Socket }) {
     activityLog,
     canUseAbility,
   } = useWordle(props.socket);
+
+  if (roundsInfo.outcome !== Outcome.UNDECIDED && roundsInfo.runningScores.player > Number(highScore)) {
+    setHighScore(roundsInfo.runningScores.player.toString());
+  }
 
   function handleClickJoin() {
     setIsFirstPlay(false);
@@ -54,6 +60,7 @@ export default function Wordle(props: { socket: Socket }) {
           <div className="wordle-status">
             <ActivityLog activityLog={activityLog} />
             <Scoreboard roundScores={roundsInfo.roundScores} outcome={roundsInfo.outcome} runningScores={roundsInfo.runningScores} />
+            <div>High score: {highScore ?? 0}</div>
           </div>
           <div className="wordle-ability-controls">
             <strong>Abilities</strong>

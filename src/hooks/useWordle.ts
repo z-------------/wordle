@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import { Ability, Outcome } from "../common/types.mts";
-import { WordHistoryEntry } from "./components/Board";
-import { ClientMessage, ClientMessageKind, Scores, ServerMessage } from "../common/message.mts";
+import { Ability, Outcome } from "../../common/types.mts";
+import { WordHistoryEntry } from "./../components/Board";
+import { ClientMessage, ClientMessageKind, Scores, ServerMessage } from "../../common/message.mts";
 
 export enum Phase {
   BEFORE_START,

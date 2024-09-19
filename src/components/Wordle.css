@@ -13,6 +13,10 @@
   }
 }
 
+.wordle-status > * {
+  margin: 0 1em;
+}
+
 .wordle-boards-container {
   display: flex;
   justify-content: center;

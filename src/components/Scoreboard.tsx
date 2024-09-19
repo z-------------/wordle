@@ -14,7 +14,7 @@ export default function Scoreboard(props: {
   }
 
   return (
-    <>
+    <div>
       <table>
         <tbody>
           {props.roundScores.map(({ player, opponent }, i) => (
@@ -32,6 +32,6 @@ export default function Scoreboard(props: {
         </tbody>
       </table>
       {props.outcome !== Outcome.UNDECIDED && <strong>{formatOutcome(props.outcome)}</strong>}
-    </>
+    </div>
   );
 }
