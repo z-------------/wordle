@@ -79,15 +79,17 @@ export default function useWordle(socket: Socket) {
         setOpponentWordHistory([]);
         addActivity(`Round ${currentRound} of ${totalRounds} started`);
       } else if (message.kind === "SCORES") {
-        const { roundScores, runningScores, outcome } = message;
+        const { roundScores, runningScores, outcome, word } = message;
         setRoundsInfo((prev) => ({
           ...prev,
           roundScores,
           runningScores,
           outcome,
         }));
+        if (word) {
+          addActivity(`The answer is "${word}"`);
+        }
         if (outcome !== Outcome.UNDECIDED) {
-          addActivity("Round ended");
           clearCurrentGameState();
         }
       } else if (message.kind === "LEAVE") {

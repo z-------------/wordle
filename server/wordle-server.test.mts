@@ -72,8 +72,8 @@ describe("WordleServer class", () => {
     wordleServer.guess(player2, "HELLO");
 
     expect(wordleServer["lobbies"]).toHaveLength(0);
-    expect(player1.notifyScores).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.TIE);
-    expect(player2.notifyScores).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.TIE);
+    expect(player1.notifyScores).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.TIE, "HELLO");
+    expect(player2.notifyScores).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), Outcome.TIE, "HELLO");
     expect(player1.notifyLeave).toHaveBeenCalledOnce();
     expect(player2.notifyLeave).toHaveBeenCalledOnce();
   });

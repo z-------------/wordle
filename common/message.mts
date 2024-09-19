@@ -39,6 +39,7 @@ export type ServerMessage = {
     roundScores: Scores[],
     runningScores: Scores,
     outcome: Outcome,
+    word?: string,
 } | {
     kind: "LEAVE",
     reason: string,

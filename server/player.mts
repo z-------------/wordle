@@ -10,7 +10,7 @@ export default interface Player {
     notifyVerdicts(playerIdx: number, guessedWord: string, verdicts: Verdict[]): void;
     notifyGuessesLeft(playerIdx: number, guessesLeft: number, canGuess: boolean): void;
     notifyRound(currentRound: number, totalRounds: number): void;
-    notifyScores(roundScores: Scores[], runningScores: Scores, outcome: Outcome): void;
+    notifyScores(roundScores: Scores[], runningScores: Scores, outcome: Outcome, word?: string): void;
     notifyLeave(reason: string): void;
     notifyUsedAbility(playerIdx: number, ability: Ability, cost: number): void;
 }

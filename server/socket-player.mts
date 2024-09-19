@@ -59,12 +59,13 @@ export default class SocketPlayer implements Player {
         });
     }
 
-    notifyScores(roundScores: Scores[], runningScores: Scores, outcome: Outcome) {
+    notifyScores(roundScores: Scores[], runningScores: Scores, outcome: Outcome, word?: string) {
         sendMessage(this.socket, {
             kind: "SCORES",
             roundScores,
             runningScores,
             outcome,
+            word,
         });
     }
 

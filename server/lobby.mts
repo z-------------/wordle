@@ -10,6 +10,14 @@ function isValidPlayer(player: Player): boolean {
     return player && player.playerIdx >= 0 && player.playerIdx < PLAYERS_COUNT;
 }
 
+function afterDelay(f: () => void, ms: number) {
+    if (ms <= 0) {
+        f();
+    } else {
+        setTimeout(f, ms);
+    }
+}
+
 export default class Lobby {
     private _isFinished = false;
     private players = [] as Player[];
@@ -18,6 +26,7 @@ export default class Lobby {
     private readonly abilityUseCounts: Record<Ability, number>[] = Array(PLAYERS_COUNT).fill(undefined).map(() => ({
         [Ability.STEAL]: 0,
     }));
+    private readonly isTest = process.env["TEST"] === "true";
 
     constructor(
         private readonly maxGuesses: number,
@@ -129,7 +138,7 @@ export default class Lobby {
             if (this.rounds.length >= this.roundsCount) {
                 this._isFinished = true;
             }
-            this.notifyRoundOutcome();
+            this.notifyScores(round.word);
             if (!this._isFinished) {
                 this.startNewRound();
             }
@@ -143,10 +152,13 @@ export default class Lobby {
 
         this.players.forEach((player, playerIdx) => {
             const game = round.games[playerIdx];
-            player.notifyRound(this.rounds.length, this.roundsCount);
-            this.players.forEach((otherPlayer) => {
-                otherPlayer.notifyGuessesLeft(playerIdx, game.guessesLeft, true);
-            });
+            const delay = this.rounds.length <= 1 || this.isTest ? 0 : 1000;
+            afterDelay(() => {
+                player.notifyRound(this.rounds.length, this.roundsCount);
+                this.players.forEach((otherPlayer) => {
+                    otherPlayer.notifyGuessesLeft(playerIdx, game.guessesLeft, true);
+                });
+            }, delay);
         });
     }
 
@@ -160,7 +172,7 @@ export default class Lobby {
         });
     }
 
-    private notifyRoundOutcome() {
+    private notifyScores(word?: string) {
         this.players.forEach((player) => {
             const opponentPlayerIdx = 1 - player.playerIdx;
             const runningScores = this.runningScores;
@@ -181,6 +193,7 @@ export default class Lobby {
                     opponent: opponentRunningScore,
                 },
                 outcome,
+                word,
             );
         });
     }
@@ -189,7 +202,7 @@ export default class Lobby {
         this.players.forEach((otherPlayer) => {
             otherPlayer.notifyUsedAbility(player.playerIdx, ability, cost);
         });
-        this.notifyRoundOutcome();
+        this.notifyScores();
     }
 
     private get currentRound(): Round | undefined {

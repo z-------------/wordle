@@ -93,10 +93,10 @@ describe("Lobby class", () => {
     expect(player2.notifyRound).toHaveBeenNthCalledWith(2, 2, 2);
     expect(player1.notifyScores).toHaveBeenLastCalledWith([
       { player: 1, opponent: 2 },
-    ], { player: 1, opponent: 2 }, Outcome.UNDECIDED);
+    ], { player: 1, opponent: 2 }, Outcome.UNDECIDED, "HELLO");
     expect(player2.notifyScores).toHaveBeenLastCalledWith([
       { player: 2, opponent: 1 },
-    ], { player: 2, opponent: 1 }, Outcome.UNDECIDED);
+    ], { player: 2, opponent: 1 }, Outcome.UNDECIDED, "HELLO");
     expect(lobby.isFinished).toEqual(false);
 
     lobby.guess(player1, "HELLO");
@@ -104,11 +104,11 @@ describe("Lobby class", () => {
     expect(player1.notifyScores).toHaveBeenLastCalledWith([
       { player: 1, opponent: 2 },
       { player: 2, opponent: 2 },
-    ], { player: 3, opponent: 4 }, Outcome.LOSE);
+    ], { player: 3, opponent: 4 }, Outcome.LOSE, "HELLO");
     expect(player2.notifyScores).toHaveBeenLastCalledWith([
       { player: 2, opponent: 1 },
       { player: 2, opponent: 2 },
-    ], { player: 4, opponent: 3 }, Outcome.WIN);
+    ], { player: 4, opponent: 3 }, Outcome.WIN, "HELLO");
     expect(player1.notifyScores).toHaveBeenCalledTimes(2);
     expect(player2.notifyScores).toHaveBeenCalledTimes(2);
     expect(lobby.isFinished).toEqual(true);
